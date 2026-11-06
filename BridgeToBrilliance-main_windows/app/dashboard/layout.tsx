@@ -160,7 +160,7 @@ const navItems: Record<string, { href: string; label: string; icon: React.ReactN
     { href: '/dashboard/admin', label: 'Dashboard', icon: <IconDashboard /> },
     { href: '/dashboard/admin/users', label: 'Users', icon: <IconUsers /> },
     { href: '/dashboard/admin/teachers', label: 'Teachers', icon: <IconTeachers /> },
-    { href: '/dashboard/admin/security', label: 'Security', icon: <IconSecurity /> },
+    { href: '/dashboarcd/admin/security', label: 'Security', icon: <IconSecurity /> },
     { href: '/dashboard/admin#subjects', label: 'Subjects', icon: <IconSubjects /> },
     { href: '/dashboard/admin#announcements', label: 'Announcements', icon: <IconAnnouncements /> },
   ],

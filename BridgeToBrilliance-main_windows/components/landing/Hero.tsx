@@ -6,7 +6,7 @@ import Image from 'next/image'
 
 export default function Hero() {
   const stats = [
-    { count: '10K+', label: 'active learners' },
+    { count: 'Infinity', label: 'potential' },
     { count: '6', label: 'core subjects' },
     { count: '13', label: 'expert staff' },
     { count: '100%', label: 'free access' },
