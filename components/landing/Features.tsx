@@ -1,12 +1,12 @@
 'use client'
 
 import { motion, useInView } from 'framer-motion'
-import { useRef } from 'react'
+import { useRef, useState } from 'react'
 
-// Custom complex vector icon components avoiding simple emojis
+// Custom vector icon components matching #003E6B theme
 function IconPlatformAbout() {
   return (
-    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#38BDF8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#003E6B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <circle cx="12" cy="12" r="10"></circle>
       <line x1="12" y1="16" x2="12" y2="12"></line>
       <line x1="12" y1="8" x2="12.01" y2="8"></line>
@@ -16,16 +16,16 @@ function IconPlatformAbout() {
 
 function IconOnlineLessons() {
   return (
-    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#38BDF8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#003E6B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <polygon points="23 7 16 12 23 17 23 7"></polygon>
-      <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
+      <rect x="1" y="5" width="15" height="14" rx="0" ry="0"></rect>
     </svg>
   )
 }
 
 function IconLiveChallenges() {
   return (
-    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#38BDF8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#003E6B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
     </svg>
   )
@@ -33,7 +33,7 @@ function IconLiveChallenges() {
 
 function IconQuizzes() {
   return (
-    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#38BDF8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#003E6B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
       <circle cx="12" cy="12" r="10"></circle>
       <line x1="12" y1="17" x2="12.01" y2="17"></line>
@@ -43,7 +43,7 @@ function IconQuizzes() {
 
 function IconOlympiads() {
   return (
-    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#38BDF8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#003E6B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <circle cx="12" cy="8" r="6"></circle>
       <path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"></path>
     </svg>
@@ -52,8 +52,8 @@ function IconOlympiads() {
 
 function IconStudyPlanning() {
   return (
-    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#38BDF8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#003E6B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="4" width="18" height="18" rx="0" ry="0"></rect>
       <line x1="16" y1="2" x2="16" y2="6"></line>
       <line x1="8" y1="2" x2="8" y2="6"></line>
       <line x1="3" y1="10" x2="21" y2="10"></line>
@@ -64,183 +64,199 @@ function IconStudyPlanning() {
 const features = [
   {
     icon: <IconPlatformAbout />,
-    title: 'Platform Overview',
-    description: 'A comprehensive, modern digital ecosystem designed to unify students, teachers, and administrators seamlessly.',
+    title: 'A Home for All Learners',
+    description: 'Everything you need in one clean, distraction-free space. Teachers, students, and mentors connect effortlessly.',
   },
   {
     icon: <IconOnlineLessons />,
-    title: 'Online Video Lessons',
-    description: 'Structured high-definition modules with synchronized note-taking, progress tracking, and on-demand playback.',
+    title: 'Crystal Clear Video Lessons',
+    description: 'Bite-sized, high-definition lessons designed to make tough concepts feel simple and intuitive.',
   },
   {
     icon: <IconLiveChallenges />,
-    title: 'Live Interactive Challenges',
-    description: 'Engage in real-time collaborative coding battles, live Q&A sessions, and competitive peer problem-solving.',
+    title: 'Live Challenges & Battles',
+    description: 'Test your skills in real-time problem-solving rounds and friendly coding competitions with peers.',
   },
   {
     icon: <IconQuizzes />,
-    title: 'Adaptive Quizzes',
-    description: 'Dynamic testing environments equipped with instant performance analytics and spaced-repetition logic.',
+    title: 'Smart Practice Quizzes',
+    description: 'Interactive quizzes that adapt to your pace, helping you remember what you learn without burnout.',
   },
   {
     icon: <IconOlympiads />,
-    title: 'Olympiad Preparation',
-    description: 'Advanced-tier problem sets, algorithmic competitions, and mentorship pipelines tailored for elite academic contests.',
+    title: 'Olympiad & Exam Prep',
+    description: 'Curated elite problem sets and expert guidance to help you aim for the highest academic medals.',
   },
   {
     icon: <IconStudyPlanning />,
-    title: 'Advanced Study Planning',
-    description: 'Intelligent scheduling tools, Pomodoro integration, and milestone roadmaps to keep your academic goals on track.',
+    title: 'Stress-Free Study Planning',
+    description: 'Built-in schedules and smart roadmaps that keep you organized so you always know what is next.',
   },
 ]
 
 export default function Features() {
   const ref = useRef(null)
   const isInView = useInView(ref, { once: true, margin: '-100px' })
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
 
   return (
     <section
       id="features"
       ref={ref}
       style={{
-        padding: '120px 40px',
-        background: 'linear-gradient(180deg, #090D16 0%, #0F172A 100%)',
+        padding: '120px 60px',
+        background: '#FFFFFF',
         position: 'relative',
         overflow: 'hidden',
+        fontFamily: 'var(--font-body), sans-serif',
       }}
     >
-      {/* Background Ambient Glow Gradients */}
-      <div style={{
-        position: 'absolute', top: '20%', left: '-10%',
-        width: '500px', height: '500px', borderRadius: '50%',
-        background: 'radial-gradient(circle, rgba(56, 189, 248, 0.04) 0%, transparent 70%)',
-        pointerEvents: 'none',
-      }} />
-      <div style={{
-        position: 'absolute', bottom: '10%', right: '-10%',
-        width: '500px', height: '500px', borderRadius: '50%',
-        background: 'radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 70%)',
-        pointerEvents: 'none',
-      }} />
-
-      <div style={{ maxWidth: '1100px', margin: '0 auto', position: 'relative', zIndex: 2 }}>
+      <div style={{ maxWidth: '1280px', margin: '0 auto', position: 'relative', zIndex: 2 }}>
+        
+        {/* Header Section */}
         <motion.div
           style={{ textAlign: 'center', marginBottom: '64px' }}
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: '0', y: 30 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.8 }}
         >
-          <span style={{
+          <div style={{
             display: 'inline-block',
             padding: '6px 16px',
-            borderRadius: '20px',
-            background: 'rgba(56, 189, 248, 0.1)',
-            border: '1px solid rgba(56, 189, 248, 0.3)',
-            color: '#38BDF8',
-            fontSize: '0.8rem',
-            fontWeight: 600,
+            borderRadius: '0px',
+            background: '#EFF6FF',
+            border: '1px solid #DBEAFE',
+            borderLeft: '3px solid #003E6B',
+            color: '#003E6B',
+            fontSize: '0.82rem',
+            fontWeight: 700,
             marginBottom: '20px',
             textTransform: 'uppercase',
-            letterSpacing: '1px',
+            letterSpacing: '0.5px',
           }}>
-            Platform Ecosystem
-          </span>
+            Platform Features
+          </div>
 
           <h2 style={{
             fontFamily: 'var(--font-heading)',
-            fontSize: 'clamp(2.2rem, 4vw, 3rem)',
+            fontSize: 'clamp(2.4rem, 4.5vw, 3.4rem)',
             fontWeight: 800,
-            color: '#F8FAFC',
+            color: '#0F172A',
             marginBottom: '16px',
-            letterSpacing: '-0.02em',
+            letterSpacing: '-0.03em',
           }}>
-            Everything You Need to{' '}
-            <span style={{
-              background: 'linear-gradient(135deg, #38BDF8, #818CF8)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-            }}>
-              Excel
+            Built to Make Learning{' '}
+            <span style={{ color: '#003E6B' }}>
+              Effortless
             </span>
           </h2>
 
           <p style={{
-            fontSize: '1.05rem',
-            color: '#94A3B8',
-            maxWidth: '600px',
+            fontSize: '1.1rem',
+            color: '#475569',
+            maxWidth: '580px',
             margin: '0 auto',
-            lineHeight: 1.6,
+            lineHeight: 1.7,
           }}>
-            An advanced suite of high-performance tools engineered for a comprehensive, immersive learning experience.
+            Explore the powerful tools we built from the ground up to support your academic journey every single day.
           </p>
         </motion.div>
 
-        {/* 2x3 Grid Layout */}
+        {/* Interactive Grid */}
         <div style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))',
           gap: '28px',
         }}>
-          {features.map((feature, i) => (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, y: 40 }}
-              animate={isInView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.6, delay: 0.1 * i }}
-              whileHover={{ y: -6, transition: { duration: 0.2 } }}
-              style={{
-                background: 'linear-gradient(145deg, rgba(30, 41, 59, 0.7) 0%, rgba(15, 23, 42, 0.9) 100%)',
-                border: '1px solid rgba(56, 189, 248, 0.12)',
-                borderRadius: '20px',
-                padding: '36px',
-                cursor: 'default',
-                position: 'relative',
-                overflow: 'hidden',
-                backdropFilter: 'blur(10px)',
-                boxShadow: '0 10px 30px rgba(0, 0, 0, 0.3)',
-              }}
-            >
-              {/* Top Accent Line on Hover / Default */}
-              <div style={{
-                position: 'absolute', top: 0, left: 0, right: 0, height: '2px',
-                background: 'linear-gradient(90deg, transparent, rgba(56, 189, 248, 0.6), transparent)',
-              }} />
+          {features.map((feature, i) => {
+            const isHovered = hoveredIndex === i
+            return (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 30 }}
+                animate={isInView ? { opacity: 1, y: 0 } : {}}
+                transition={{ duration: 0.6, delay: 0.1 * i }}
+                onHoverStart={() => setHoveredIndex(i)}
+                onHoverEnd={() => setHoveredIndex(null)}
+                whileHover={{ y: -6 }}
+                style={{
+                  background: isHovered ? '#F8FAFC' : '#FFFFFF',
+                  border: isHovered ? '1px solid #003E6B' : '1px solid #E2E8F0',
+                  borderRadius: '0px',
+                  padding: '40px',
+                  cursor: 'pointer',
+                  position: 'relative',
+                  overflow: 'hidden',
+                  boxShadow: isHovered ? '0 15px 30px rgba(0, 62, 107, 0.08)' : '0 4px 15px rgba(15, 23, 42, 0.02)',
+                  transition: 'background 0.2s, border-color 0.2s, box-shadow 0.2s',
+                }}
+              >
+                {/* Top Accent Line */}
+                <div style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  height: '3px',
+                  background: isHovered ? '#003E6B' : 'transparent',
+                  transition: 'background 0.2s',
+                }} />
 
-              <div style={{
-                width: '60px', height: '60px',
-                borderRadius: '16px',
-                background: 'rgba(56, 189, 248, 0.1)',
-                border: '1px solid rgba(56, 189, 248, 0.2)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                marginBottom: '24px',
-                boxShadow: '0 0 15px rgba(56, 189, 248, 0.15)',
-              }}>
-                {feature.icon}
-              </div>
+                {/* Icon Container */}
+                <div style={{
+                  width: '56px',
+                  height: '56px',
+                  borderRadius: '0px',
+                  background: '#EFF6FF',
+                  border: '1px solid #DBEAFE',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  marginBottom: '24px',
+                }}>
+                  {feature.icon}
+                </div>
 
-              <h3 style={{
-                fontFamily: 'var(--font-heading)',
-                fontSize: '1.25rem',
-                fontWeight: 700,
-                color: '#F8FAFC',
-                marginBottom: '12px',
-                letterSpacing: '-0.01em',
-              }}>
-                {feature.title}
-              </h3>
+                {/* Title */}
+                <h3 style={{
+                  fontFamily: 'var(--font-heading)',
+                  fontSize: '1.25rem',
+                  fontWeight: 700,
+                  color: '#0F172A',
+                  marginBottom: '12px',
+                  letterSpacing: '-0.01em',
+                }}>
+                  {feature.title}
+                </h3>
 
-              <p style={{
-                fontSize: '0.95rem',
-                color: '#94A3B8',
-                lineHeight: 1.7,
-              }}>
-                {feature.description}
-              </p>
-            </motion.div>
-          ))}
+                {/* Description */}
+                <p style={{
+                  fontSize: '0.95rem',
+                  color: '#475569',
+                  lineHeight: 1.7,
+                  marginBottom: '20px',
+                }}>
+                  {feature.description}
+                </p>
+
+                {/* Interactive Action Prompt */}
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  fontSize: '0.85rem',
+                  fontWeight: 700,
+                  color: '#003E6B',
+                  opacity: isHovered ? 1 : 0.6,
+                  transform: isHovered ? 'translateX(4px)' : 'translateX(0)',
+                  transition: 'all 0.2s ease',
+                }}>
+                </div>
+              </motion.div>
+            )
+          })}
         </div>
+
       </div>
     </section>
   )

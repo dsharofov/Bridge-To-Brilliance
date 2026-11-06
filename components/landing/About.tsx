@@ -1,12 +1,13 @@
 'use client'
 
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { useInView } from 'framer-motion'
-import { useRef } from 'react'
+import { useRef, useState } from 'react'
 
 export default function About() {
   const ref = useRef(null)
   const isInView = useInView(ref, { once: true, margin: '-100px' })
+  const [activeTab, setActiveTab] = useState<'student' | 'analytics' | 'live'>('student')
 
   return (
     <section
@@ -25,7 +26,7 @@ export default function About() {
         position: 'absolute', top: '10%', left: '-100px',
         width: '400px', height: '400px',
         borderRadius: '50%',
-        background: 'radial-gradient(circle, rgba(59, 130, 246, 0.04) 0%, transparent 70%)',
+        background: 'radial-gradient(circle, rgba(0, 62, 107, 0.04) 0%, transparent 70%)',
         zIndex: 0,
       }} />
 
@@ -39,7 +40,7 @@ export default function About() {
         position: 'relative',
         zIndex: 1,
       }}>
-        {/* Left: Text (Exact original text preserved) */}
+        {/* Left: Mission Text */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
@@ -50,13 +51,13 @@ export default function About() {
             padding: '6px 16px',
             borderRadius: '20px',
             background: '#EFF6FF',
-            color: '#2563EB',
+            color: '#003E6B',
             fontSize: '0.8rem',
             fontWeight: 600,
             marginBottom: '20px',
             textTransform: 'uppercase',
             letterSpacing: '1px',
-            border: '1px solid rgba(37, 99, 235, 0.1)',
+            border: '1px solid rgba(0, 62, 107, 0.1)',
           }}>
             Our Mission
           </span>
@@ -71,7 +72,7 @@ export default function About() {
             letterSpacing: '-0.02em',
           }}>
             Education is a Right,{' '}
-            <span style={{ color: '#3B82F6' }}>
+            <span style={{ color: '#003E6B' }}>
               Not a Privilege
             </span>
           </h2>
@@ -100,9 +101,36 @@ export default function About() {
 
           <div style={{ display: 'flex', gap: '32px', flexWrap: 'wrap' }}>
             {[
-              { icon: '🎓', label: 'Free Quality Education' },
-              { icon: '🌍', label: 'Global Access' },
-              { icon: '❤️', label: 'Community Driven' },
+              {
+                svg: (
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#003E6B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
+                    <path d="M6 12v5c3 3 9 3 12 0v-5" />
+                  </svg>
+                ),
+                label: 'Free Quality Education'
+              },
+              {
+                svg: (
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#003E6B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="10" />
+                    <line x1="2" y1="12" x2="22" y2="12" />
+                    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+                  </svg>
+                ),
+                label: 'Global Access'
+              },
+              {
+                svg: (
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#003E6B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                    <circle cx="9" cy="7" r="4" />
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                  </svg>
+                ),
+                label: 'Community Driven'
+              },
             ].map((item, i) => (
               <motion.div
                 key={i}
@@ -111,74 +139,222 @@ export default function About() {
                 transition={{ duration: 0.5, delay: 0.3 + i * 0.1 }}
                 style={{ display: 'flex', alignItems: 'center', gap: '10px' }}
               >
-                <span style={{ fontSize: '1.2rem' }}>{item.icon}</span>
+                <div style={{
+                  width: '38px', height: '38px', borderRadius: '10px',
+                  background: '#EFF6FF', border: '1px solid #DBEAFE',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                }}>
+                  {item.svg}
+                </div>
                 <span style={{ fontSize: '0.9rem', fontWeight: 600, color: '#1E293B' }}>{item.label}</span>
               </motion.div>
             ))}
           </div>
         </motion.div>
 
-        {/* Right: Reimagined Modern Feature Mosaic Cards */}
+        {/* Right: Interactive Complex Platform Preview Canvas */}
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={isInView ? { opacity: 1, scale: 1 } : {}}
           transition={{ duration: 0.8, delay: 0.2 }}
           style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(2, 1fr)',
-            gap: '20px',
+            background: '#F8FAFC',
+            border: '1px solid #E2E8F0',
+            borderRadius: '28px',
+            padding: '24px',
+            boxShadow: '0 20px 40px rgba(15, 23, 42, 0.05)',
+            position: 'relative',
           }}
         >
-          {/* Card 1 */}
+          {/* Top Control Bar & Mode Tabs */}
           <div style={{
-            background: 'linear-gradient(135deg, #EFF6FF 0%, #F8FAFC 100%)',
-            border: '1px solid #DBEAFE',
-            borderRadius: '24px',
-            padding: '32px 24px',
-            gridColumn: 'span 2',
-            boxShadow: '0 10px 30px rgba(59, 130, 246, 0.05)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            marginBottom: '20px',
+            paddingBottom: '16px',
+            borderBottom: '1px solid #E2E8F0',
+            flexWrap: 'wrap',
+            gap: '12px'
           }}>
-            <div style={{ fontSize: '2.5rem', marginBottom: '16px' }}>🌟</div>
-            <h4 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.15rem', fontWeight: 700, color: '#0F172A', marginBottom: '8px' }}>
-              Empowering Every Student
-            </h4>
-            <p style={{ fontSize: '0.9rem', color: '#64748B', lineHeight: 1.6 }}>
-              Designed with care to ensure students can focus entirely on growth, curiosity, and academic success.
-            </p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#EF4444' }} />
+              <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#F59E0B' }} />
+              <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#10B981' }} />
+              <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#94A3B8', marginLeft: '6px' }}>
+                bridgetobrilliance.uz
+              </span>
+            </div>
+
+            {/* Interactive Tab Switcher */}
+            <div style={{
+              display: 'flex',
+              background: '#EFF6FF',
+              padding: '4px',
+              borderRadius: '12px',
+              border: '1px solid #DBEAFE',
+            }}>
+              {[
+                { id: 'student', label: 'Learner' },
+                { id: 'analytics', label: 'Analytics' },
+                { id: 'live', label: 'Live Desk' },
+              ].map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id as any)}
+                  style={{
+                    padding: '6px 14px',
+                    fontSize: '0.78rem',
+                    fontWeight: 600,
+                    borderRadius: '8px',
+                    border: 'none',
+                    cursor: 'pointer',
+                    background: activeTab === tab.id ? '#003E6B' : 'transparent',
+                    color: activeTab === tab.id ? '#FFFFFF' : '#475569',
+                    transition: 'all 0.2s ease',
+                  }}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
           </div>
 
-          {/* Card 2 */}
-          <div style={{
-            background: '#F8FAFC',
-            border: '1px solid #E2E8F0',
-            borderRadius: '20px',
-            padding: '24px',
-            boxShadow: '0 4px 12px rgba(0,0,0,0.02)',
-          }}>
-            <div style={{ fontSize: '2rem', marginBottom: '12px' }}>🚀</div>
-            <h5 style={{ fontFamily: 'var(--font-heading)', fontSize: '1rem', fontWeight: 600, color: '#0F172A', marginBottom: '6px' }}>
-              Interactive Growth
-            </h5>
-            <p style={{ fontSize: '0.85rem', color: '#64748B', lineHeight: 1.5 }}>
-              Track milestones effortlessly with tailored teacher feedback.
-            </p>
-          </div>
+          {/* Interactive Screen Dynamic Body */}
+          <div style={{ minHeight: '300px' }}>
+            <AnimatePresence mode="wait">
+              {activeTab === 'student' && (
+                <motion.div
+                  key="student"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.3 }}
+                  style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}
+                >
+                  {/* Hero Course Progress Card */}
+                  <div style={{
+                    background: '#FFFFFF',
+                    border: '1px solid #E2E8F0',
+                    borderRadius: '18px',
+                    padding: '20px',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.02)',
+                  }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                      <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#003E6B', textTransform: 'uppercase' }}>Active Path</span>
+                      <span style={{ fontSize: '0.75rem', color: '#10B981', background: '#ECFDF5', padding: '2px 8px', borderRadius: '10px', fontWeight: 600 }}>85% Completed</span>
+                    </div>
+                    <h4 style={{ fontSize: '1rem', fontWeight: 700, color: '#0F172A', marginBottom: '8px' }}>Advanced Algorithmic Logic & Physics</h4>
+                    
+                    {/* Dynamic Progress Bar */}
+                    <div style={{ width: '100%', height: '8px', borderRadius: '4px', background: '#F1F5F9', overflow: 'hidden' }}>
+                      <motion.div
+                        initial={{ width: '0%' }}
+                        animate={{ width: '85%' }}
+                        transition={{ duration: 1 }}
+                        style={{ height: '100%', borderRadius: '4px', background: 'linear-gradient(90deg, #003E6B, #2563EB)' }}
+                      />
+                    </div>
+                  </div>
 
-          {/* Card 3 */}
-          <div style={{
-            background: '#F8FAFC',
-            border: '1px solid #E2E8F0',
-            borderRadius: '20px',
-            padding: '24px',
-            boxShadow: '0 4px 12px rgba(0,0,0,0.02)',
-          }}>
-            <div style={{ fontSize: '2rem', marginBottom: '12px' }}>🛡️</div>
-            <h5 style={{ fontFamily: 'var(--font-heading)', fontSize: '1rem', fontWeight: 600, color: '#0F172A', marginBottom: '6px' }}>
-              Secure & Open
-            </h5>
-            <p style={{ fontSize: '0.85rem', color: '#64748B', lineHeight: 1.5 }}>
-              A safe, modern platform built with enterprise-grade privacy.
-            </p>
+                  {/* Dual Mini Widget Grid */}
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                    <div style={{ background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: '18px', padding: '16px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#003E6B" strokeWidth="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#0F172A' }}>Study Hours</span>
+                      </div>
+                      <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#003E6B' }}>24.5 hrs</div>
+                      <span style={{ fontSize: '0.75rem', color: '#64748B' }}>+4.2 hrs this week</span>
+                    </div>
+
+                    <div style={{ background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: '18px', padding: '16px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#003E6B" strokeWidth="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                        <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#0F172A' }}>Certificates</span>
+                      </div>
+                      <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#0F172A' }}>3 Verified</div>
+                      <span style={{ fontSize: '0.75rem', color: '#10B981', fontWeight: 600 }}>1 Ready to claim</span>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+
+              {activeTab === 'analytics' && (
+                <motion.div
+                  key="analytics"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.3 }}
+                  style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}
+                >
+                  <div style={{ background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: '18px', padding: '20px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                      <h4 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#0F172A' }}>Weekly Engagement Frequency</h4>
+                      <span style={{ fontSize: '0.75rem', color: '#003E6B', fontWeight: 600 }}>+32% Growth</span>
+                    </div>
+                    {/* Bar Chart Visualization */}
+                    <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', height: '120px', paddingTop: '20px' }}>
+                      {[40, 65, 30, 85, 95, 70, 100].map((val, idx) => (
+                        <div key={idx} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', width: '10%' }}>
+                          <motion.div
+                            initial={{ height: 0 }}
+                            animate={{ height: `${val}%` }}
+                            transition={{ duration: 0.6, delay: idx * 0.05 }}
+                            style={{
+                              width: '100%',
+                              background: idx === 6 ? '#003E6B' : '#DBEAFE',
+                              borderRadius: '6px',
+                            }}
+                          />
+                          <span style={{ fontSize: '0.7rem', color: '#94A3B8' }}>{['M','T','W','T','F','S','S'][idx]}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+
+              {activeTab === 'live' && (
+                <motion.div
+                  key="live"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.3 }}
+                  style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}
+                >
+                  <div style={{
+                    background: '#10B981',
+                    borderRadius: '18px',
+                    padding: '24px',
+                    color: '#FFFFFF',
+                    position: 'relative',
+                    overflow: 'hidden',
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
+                      <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#EF4444', display: 'inline-block' }} />
+                      <span style={{ fontSize: '0.8rem', fontWeight: 700, letterSpacing: '1px', textTransform: 'uppercase', color: '#F8FAFC' }}>Online Recorded Video Lesson</span>
+                    </div>
+                    <h4 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '8px', color: '#FFFFFF' }}>Biology : the Classification of Living Organisms</h4>
+                    <p style={{ fontSize: '0.85rem', color: '#ffffff', marginBottom: '20px' }}>Instructor: Shuxratov Amirxon • 142 Students Watched</p>
+                    <button style={{
+                      padding: '10px 20px',
+                      fontSize: '0.85rem',
+                      fontWeight: 600,
+                      borderRadius: '10px',
+                      background: '#ffffff',
+                      color: '#000000',
+                      border: 'none',
+                      cursor: 'pointer',
+                    }}>
+                      Join Workspace →
+                    </button>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         </motion.div>
       </div>

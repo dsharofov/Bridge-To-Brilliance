@@ -6,13 +6,7 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { useProfile } from '../layout'
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
-import type { Subject, Announcement, Class as ClassType, Grade, Enrollment, Profile } from '@/types/database.types'
-
-type EnrollmentWithDetails = Enrollment & {
-  subject: Subject & { teacher: Pick<Profile, 'full_name'> | null } | null
-  lesson_count: number
-  watched_count: number
-}
+import type { Subject, Announcement, Class as ClassType, Grade, Profile } from '@/types/database.types'
 
 type ClassWithSubject = ClassType & {
   subject: Pick<Subject, 'title'> | null
@@ -22,127 +16,99 @@ type GradeWithSubject = Grade & {
   subject: Pick<Subject, 'title'> | null
 }
 
-type SubjectWithTeacher = Subject & {
-  teacher: Pick<Profile, 'full_name'> | null
-}
-
-async function enrichEnrollments(supabase: ReturnType<typeof createClient>, studentId: string, enrollmentData: any[]): Promise<EnrollmentWithDetails[]> {
-  if (!enrollmentData || enrollmentData.length === 0) return []
-
-  const subjectIds = enrollmentData.map(e => e.subject_id)
-
-  const [{ data: lessonCounts }, { data: progressData }] = await Promise.all([
-    subjectIds.length > 0
-      ? supabase.from('lessons').select('id, subject_id').in('subject_id', subjectIds)
-      : { data: [] },
-    subjectIds.length > 0
-      ? supabase.from('progress').select('lesson_id').eq('student_id', studentId).eq('watched', true)
-      : { data: [] },
-  ])
-
-  const lessonCountMap: Record<string, number> = {}
-  const lessonSubjectMap: Record<string, string> = {}
-  if (lessonCounts) {
-    for (const l of lessonCounts) {
-      lessonCountMap[l.subject_id] = (lessonCountMap[l.subject_id] || 0) + 1
-      lessonSubjectMap[l.id] = l.subject_id
-    }
-  }
-
-  const watchedSubjectCount: Record<string, number> = {}
-  for (const p of progressData || []) {
-    const subId = lessonSubjectMap[p.lesson_id]
-    if (subId) watchedSubjectCount[subId] = (watchedSubjectCount[subId] || 0) + 1
-  }
-
-  return enrollmentData.map(e => ({
-    ...(e as EnrollmentWithDetails),
-    lesson_count: lessonCountMap[e.subject_id] || 0,
-    watched_count: watchedSubjectCount[e.subject_id] || 0,
-  }))
-}
-
-// --- Blue Vector SVG Icons Library ---
+// --- Updated Minimalist Vector SVG Icons Library matching Teacher Dashboard ---
 function IconMath() {
   return (
-    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#2563EB" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <line x1="19" y1="5" x2="5" y2="19"></line>
-      <circle cx="6.5" cy="6.5" r="2.5"></circle>
-      <circle cx="17.5" cy="17.5" r="2.5"></circle>
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="square" strokeLinejoin="miter">
+      <line x1="4" y1="20" x2="20" y2="4"></line>
+      <polyline points="4 4 20 4 20 20"></polyline>
     </svg>
   )
 }
 
 function IconComputerScience() {
   return (
-    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#2563EB" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
-      <line x1="8" y1="21" x2="16" y2="21"></line>
-      <line x1="12" y1="17" x2="12" y2="21"></line>
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="square" strokeLinejoin="miter">
+      <polyline points="16 18 22 12 16 6"></polyline>
+      <polyline points="8 6 2 12 8 18"></polyline>
+      <line x1="13.5" y1="4" x2="10.5" y2="20"></line>
     </svg>
   )
 }
 
 function IconPhysics() {
   return (
-    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#2563EB" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path>
-    </svg>
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="12" cy="12" r="2.2" fill="currentColor"></circle>
+        <ellipse cx="12" cy="12" rx="10" ry="3.2" transform="rotate(0 12 12)"></ellipse>
+        <ellipse cx="12" cy="12" rx="10" ry="3.2" transform="rotate(60 12 12)"></ellipse>
+        <ellipse cx="12" cy="12" rx="10" ry="3.2" transform="rotate(120 12 12)"></ellipse>
+      </svg>
   )
 }
 
 function IconBiology() {
   return (
-    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#2563EB" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
-    </svg>
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M6 4c0 3 4 6 6 8-2 2-6 5-6 8"></path>
+        <path d="M18 4c0 3-4 6-6 8 2 2 6 5 6 8"></path>
+        <circle cx="12" cy="12" r="2" fill="currentColor"></circle>
+      </svg>
   )
 }
 
 function IconChemistry() {
   return (
-    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#2563EB" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M9 3h6v4l4 11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2l4-11V3z"></path>
-      <line x1="9" y1="11" x2="15" y2="11"></line>
-    </svg>
+   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M9 2h6v4l5 14a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1l5-14V2z"></path>
+        <line x1="7" y1="13" x2="17" y2="13"></line>
+        <circle cx="12" cy="17" r="1" fill="currentColor"></circle>
+        <circle cx="10" cy="15" r="0.8" fill="currentColor"></circle>
+      </svg>
   )
 }
 
 function IconEnglish() {
   return (
-    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#2563EB" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="square" strokeLinejoin="miter">
       <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
       <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
     </svg>
   )
 }
 
+// Core subjects updated to match the new folder structure paths[cite: 9]
+const coreSubjects = [
+  { id: 'math', title: 'Math', path: '/dashboard/student/math', icon: <IconMath />, desc: 'Advanced calculus, algebra, geometry, and competitive Olympiad problem solving.', color: '#1565C0', bg: '#E3F2FD' },
+  { id: 'computer-science', title: 'Computer Science', path: '/dashboard/student/computer-science', icon: <IconComputerScience />, desc: 'Algorithms, data structures, C++ standard template libraries, and full-stack web development.', color: '#6A1B9A', bg: '#F3E5F5' },
+  { id: 'physics', title: 'Physics', path: '/dashboard/student/physics', icon: <IconPhysics />, desc: 'Classical mechanics, horizontal projectile motion, electromagnetism, and physical equations.', color: '#9B59B6', bg: '#F4ECF7' },
+  { id: 'biology', title: 'Biology', path: '/dashboard/student/biology', icon: <IconBiology />, desc: 'Cellular structures, genetics, organic matter classification, and ecological systems.', color: '#2E7D32', bg: '#E8F5E9' },
+  { id: 'chemistry', title: 'Chemistry', path: '/dashboard/student/chemistry', icon: <IconChemistry />, desc: 'Atomic structures, chemical bonding mechanisms, stoichiometry, and periodic trends.', color: '#FFB300', bg: '#FFF8E1' },
+  { id: 'english', title: 'English', path: '/dashboard/student/english', icon: <IconEnglish />, desc: 'IELTS writing preparation, critical literary analysis, essays, and global communication.', color: '#C62828', bg: '#FFEBEE' },
+]
+
 function IconHandWave() {
   return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2563EB" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M18 11V6a2 2 0 0 0-4 0v5"></path>
-      <path d="M14 10V4a2 2 0 0 0-4 0v6"></path>
-      <path d="M10 10.5V6a2 2 0 0 0-4 0v8"></path>
-      <path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15"></path>
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="square" strokeLinejoin="miter">
+      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+      <circle cx="12" cy="7" r="4"></circle>
     </svg>
   )
 }
 
 function IconBookCollection() {
   return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2563EB" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="square" strokeLinejoin="miter">
       <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
       <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
-      <line x1="12" y1="6" x2="16" y2="6"></line>
-      <line x1="12" y1="10" x2="16" y2="10"></line>
     </svg>
   )
 }
 
 function IconCalendar() {
   return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2563EB" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="square" strokeLinejoin="miter">
+      <rect x="3" y="4" width="18" height="18" rx="0"></rect>
       <line x1="16" y1="2" x2="16" y2="6"></line>
       <line x1="8" y1="2" x2="8" y2="6"></line>
       <line x1="3" y1="10" x2="21" y2="10"></line>
@@ -152,27 +118,26 @@ function IconCalendar() {
 
 function IconMegaphone() {
   return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2563EB" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="square" strokeLinejoin="miter">
       <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
-      <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+      <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
     </svg>
   )
 }
 
 function IconClipboard() {
   return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2563EB" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
-      <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
-      <line x1="9" y1="12" x2="15" y2="12"></line>
-      <line x1="9" y1="16" x2="13" y2="16"></line>
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="square" strokeLinejoin="miter">
+      <rect x="3" y="3" width="18" height="18" rx="0"></rect>
+      <line x1="3" y1="9" x2="21" y2="9"></line>
+      <line x1="9" y1="21" x2="9" y2="9"></line>
     </svg>
   )
 }
 
 function IconAnalytics() {
   return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2563EB" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="square" strokeLinejoin="miter">
       <line x1="18" y1="20" x2="18" y2="10"></line>
       <line x1="12" y1="20" x2="12" y2="4"></line>
       <line x1="6" y1="20" x2="6" y2="14"></line>
@@ -181,23 +146,16 @@ function IconAnalytics() {
   )
 }
 
-const coreSubjects = [
-  { id: 'math', title: 'Math', icon: <IconMath />, desc: 'Algebra, geometry, calculus, and mathematical problem-solving.' },
-  { id: 'computer-science', title: 'Computer Science', icon: <IconComputerScience />, desc: 'Programming, algorithms, and software fundamentals.' },
-  { id: 'physics', title: 'Physics', icon: <IconPhysics />, desc: 'Mechanics, thermodynamics, wave motion, and electromagnetism.' },
-  { id: 'biology', title: 'Biology', icon: <IconBiology />, desc: 'Cellular biology, genetics, anatomy, and ecosystems.' },
-  { id: 'chemistry', title: 'Chemistry', icon: <IconChemistry />, desc: 'Organic, inorganic, and physical chemistry principles.' },
-  { id: 'english', title: 'English', icon: <IconEnglish />, desc: 'Language mastery, literature analysis, and academic writing.' },
-]
-
 export default function StudentDashboard() {
   const profile = useProfile()
   const supabase = createClient()
-  const [enrollments, setEnrollments] = useState<EnrollmentWithDetails[]>([])
+  
   const [announcements, setAnnouncements] = useState<Announcement[]>([])
   const [upcomingClasses, setUpcomingClasses] = useState<ClassWithSubject[]>([])
   const [grades, setGrades] = useState<GradeWithSubject[]>([])
-  const [allSubjects, setAllSubjects] = useState<SubjectWithTeacher[]>([])
+  const [dbSubjects, setDbSubjects] = useState<any[]>([])
+  const [dbProfiles, setDbProfiles] = useState<any[]>([])
+  const [fetchError, setFetchError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -210,57 +168,44 @@ export default function StudentDashboard() {
     const fetchData = async () => {
       try {
         const [
-          { data: enrollmentData },
           { data: annData },
           { data: classData },
           { data: gradeData },
-          { data: subData },
+          { data: subData, error: subError },
+          { data: profData, error: profError },
         ] = await Promise.all([
-          supabase
-            .from('enrollments')
-            .select('*, subject:subjects(*, teacher:profiles!subjects_teacher_id_fkey(full_name))')
-            .eq('student_id', profile.id),
-          supabase
-            .from('announcements')
-            .select('*')
-            .order('created_at', { ascending: false })
-            .limit(5),
-          supabase
-            .from('classes')
-            .select('*, subject:subjects(title)')
-            .gte('scheduled_at', new Date().toISOString())
-            .order('scheduled_at', { ascending: true })
-            .limit(5),
-          supabase
-            .from('grades')
-            .select('*, subject:subjects(title)')
-            .eq('student_id', profile.id)
-            .order('created_at', { ascending: false }),
-          supabase
-            .from('subjects')
-            .select('*, teacher:profiles!subjects_teacher_id_fkey(full_name)'),
+          supabase.from('announcements').select('*').order('created_at', { ascending: false }).limit(5),
+          supabase.from('classes').select('*, subject:subjects(title)').gte('scheduled_at', new Date().toISOString()).order('scheduled_at', { ascending: true }).limit(5),
+          supabase.from('grades').select('*, subject:subjects(title)').eq('student_id', profile.id).order('created_at', { ascending: false }),
+          supabase.from('subjects').select('*'),
+          supabase.from('profiles').select('*'),
         ])
 
         if (cancelled) return
 
-        if (enrollmentData) {
-          const enriched = await enrichEnrollments(supabase, profile.id, enrollmentData)
-          setEnrollments(enriched)
+        if (subError) console.error('Subject fetch error:', subError.message)
+        if (profError) {
+          console.error('Profile fetch error:', profError.message)
+          setFetchError(`RLS Error reading profiles: ${profError.message}`)
         }
+
         if (annData) setAnnouncements(annData)
         if (classData) setUpcomingClasses(classData as ClassWithSubject[])
         if (gradeData) setGrades(gradeData as GradeWithSubject[])
-        if (subData) setAllSubjects(subData as SubjectWithTeacher[])
+        if (subData) setDbSubjects(subData)
+        if (profData) setDbProfiles(profData)
 
-      } catch (err) {
-        console.error('Dashboard fetch error:', err)
+      } catch (err: any) {
+        console.error('Dashboard fetch exception:', err)
+        setFetchError(err.message || 'Unknown error occurred')
       } finally {
         if (!cancelled) setLoading(false)
       }
     }
+
     fetchData()
     return () => { cancelled = true }
-  }, [profile])
+  }, [profile, supabase])
 
   const progressData = useMemo(() => [
     { week: 'W1', lessons: 2 }, { week: 'W2', lessons: 5 }, { week: 'W3', lessons: 3 },
@@ -286,111 +231,146 @@ export default function StudentDashboard() {
   const firstName = profile?.full_name?.split(' ')[0] || 'Student'
 
   return (
-    <div style={{ paddingBottom: '40px' }}>
+    <div style={{ width: '100%', maxWidth: '1400px', margin: '0 auto', paddingBottom: '60px' }}>
       
       {/* Welcome Hero Banner */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         style={{
-          willChange: 'transform, opacity',
-          background: 'linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%)',
-          border: '1px solid #BFDBFE',
-          borderRadius: '24px',
+          background: '#FFFFFF',
+          border: '1px solid #E2E8F0',
+          borderLeft: '4px solid #2563EB',
+          borderRadius: '0px',
           padding: '36px',
           marginBottom: '36px',
-          boxShadow: '0 10px 30px rgba(37, 99, 235, 0.05)',
+          boxShadow: '0 10px 30px rgba(37, 99, 235, 0.04)',
         }}
       >
-        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '4px 12px', borderRadius: '20px', background: '#FFFFFF', border: '1px solid #BFDBFE', color: '#2563EB', fontSize: '0.8rem', fontWeight: 700, marginBottom: '12px' }}>
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '4px 12px', borderRadius: '0px', background: '#EFF6FF', border: '1px solid #BFDBFE', color: '#2563EB', fontSize: '0.8rem', fontWeight: 700, marginBottom: '12px' }}>
           <IconHandWave /> Student Portal
         </div>
         <h1 style={{ fontFamily: 'var(--font-heading)', fontSize: '2.2rem', fontWeight: 800, color: '#0F172A', marginBottom: '8px' }}>
           Welcome back, {firstName}!
         </h1>
         <p style={{ fontSize: '1rem', color: '#475569', margin: 0 }}>
-          You have full access to all <strong style={{ color: '#2563EB' }}>6 core subjects</strong>. Dive into your classes and keep up the great work!
+          Explore your core subjects, view your assigned instructors, and stay on top of upcoming classes.
         </p>
+
+        {/* Live Diagnostic Status Bar */}
+        {/* <div style={{ marginTop: '16px', padding: '8px 12px', background: fetchError ? '#FEF2F2' : '#F8FAFC', border: `1px solid ${fetchError ? '#FCA5A5' : '#E2E8F0'}`, fontSize: '0.8rem', color: fetchError ? '#DC2626' : '#64748B', display: 'flex', justifyContent: 'space-between' }}>
+          <span><strong>Supabase Status:</strong> {fetchError ? `⚠️ ${fetchError}` : `Connected (${dbSubjects.length} subjects, ${dbProfiles.length} profiles loaded)`}</span>
+        </div> */}
       </motion.div>
 
       {/* Core Subjects Section */}
       <div id="subjects" style={{ marginBottom: '40px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
           <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.4rem', fontWeight: 800, color: '#0F172A', margin: 0, display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <IconBookCollection /> Core Subjects
+            <IconBookCollection /> Core Subjects & Instructors
           </h2>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '20px' }}>
-          {coreSubjects.map((sub, i) => (
-            <motion.div
-              key={sub.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: i * 0.05 }}
-              whileHover={{ y: -4 }}
-              style={{
-                background: '#FFFFFF',
-                border: '1px solid #E2E8F0',
-                borderRadius: '20px',
-                padding: '24px',
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'space-between',
-                boxShadow: '0 4px 16px rgba(37, 99, 235, 0.04)',
-                transition: 'border-color 0.2s ease, box-shadow 0.2s ease',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = '#93C5FD'
-                e.currentTarget.style.boxShadow = '0 10px 24px rgba(37, 99, 235, 0.08)'
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = '#E2E8F0'
-                e.currentTarget.style.boxShadow = '0 4px 16px rgba(37, 99, 235, 0.04)'
-              }}
-            >
-              <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '14px' }}>
-                  <div style={{
-                    width: '52px', height: '52px', borderRadius: '14px', background: '#EFF6FF',
-                    border: '1px solid #BFDBFE', display: 'flex', alignItems: 'center', justifyContent: 'center'
-                  }}>
-                    {sub.icon}
-                  </div>
-                  <span style={{ fontSize: '0.78rem', padding: '4px 10px', borderRadius: '12px', background: '#EFF6FF', color: '#2563EB', fontWeight: 700, border: '1px solid #BFDBFE' }}>
-                    Ready
-                  </span>
-                </div>
-                <h3 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.15rem', fontWeight: 700, color: '#0F172A', marginBottom: '6px' }}>
-                  {sub.title}
-                </h3>
-                <p style={{ fontSize: '0.88rem', color: '#64748B', lineHeight: '1.5', marginBottom: '20px' }}>
-                  {sub.desc}
-                </p>
-              </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: '24px' }}>
+          {coreSubjects.map((sub, i) => {
+            const matchingSubs = dbSubjects.filter(
+              s => s.title && s.title.toLowerCase().trim() === sub.title.toLowerCase().trim()
+            )
 
-              <Link href={`/subjects/${sub.id}`} style={{ textDecoration: 'none', width: '100%' }}>
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  style={{
-                    padding: '12px',
-                    width: '100%',
-                    borderRadius: '12px',
-                    background: 'linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%)',
-                    color: '#FFFFFF',
-                    border: 'none',
-                    fontWeight: 700,
-                    fontSize: '0.9rem',
-                    cursor: 'pointer',
-                    boxShadow: '0 4px 12px rgba(37, 99, 235, 0.2)',
-                  }}
-                >
-                  Dive Into Class →
-                </motion.button>
-              </Link>
-            </motion.div>
-          ))}
+            const teacherNames = Array.from(
+              new Set(
+                matchingSubs.map(s => {
+                  const tId = s.teacher_id || s.user_id || s.profile_id
+                  const matchedProfile = dbProfiles.find(p => p.id === tId || p.user_id === tId)
+                  return matchedProfile?.full_name || matchedProfile?.email || null
+                }).filter((name): name is string => Boolean(name))
+              )
+            )
+
+            return (
+              <motion.div
+                key={sub.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: i * 0.05 }}
+                whileHover={{ y: -4 }}
+                style={{
+                  background: '#FFFFFF',
+                  border: '1px solid #E2E8F0',
+                  borderTop: `4px solid ${sub.color}`,
+                  borderRadius: '0px',
+                  padding: '28px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'space-between',
+                  boxShadow: '0 4px 16px rgba(37, 99, 235, 0.03)',
+                  minHeight: '340px',
+                }}
+              >
+                <div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '14px' }}>
+                    <div style={{
+                      width: '48px', height: '48px', borderRadius: '0px', background: sub.bg,
+                      border: `1px solid ${sub.color}30`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: sub.color
+                    }}>
+                      {sub.icon}
+                    </div>
+                    <span style={{ fontSize: '0.75rem', padding: '4px 10px', borderRadius: '0px', background: sub.bg, color: sub.color, fontWeight: 700, border: `1px solid ${sub.color}30`, textTransform: 'uppercase' }}>
+                      Active
+                    </span>
+                  </div>
+
+                  <h3 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.2rem', fontWeight: 800, color: '#0F172A', marginBottom: '8px' }}>
+                    {sub.title}
+                  </h3>
+                  <p style={{ fontSize: '0.9rem', color: '#64748B', lineHeight: '1.5', marginBottom: '16px' }}>
+                    {sub.desc}
+                  </p>
+
+                  {/* Teachers Section */}
+                  <div style={{ background: '#F8FAFC', border: '1px solid #E2E8F0', padding: '10px 12px', marginBottom: '20px' }}>
+                    <div style={{ fontSize: '0.72rem', fontWeight: 700, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '6px' }}>
+                      Instructors
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                      {teacherNames.length === 0 ? (
+                        <span style={{ fontSize: '0.82rem', color: '#64748B', fontStyle: 'italic' }}>No teachers assigned yet</span>
+                      ) : (
+                        teacherNames.map((name) => (
+                          <span key={name} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '3px 8px', background: '#FFFFFF', border: '1px solid #CBD5E1', fontSize: '0.8rem', fontWeight: 600, color: '#0F172A' }}>
+                            <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: sub.color }} />
+                            {name}
+                          </span>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Direct Link wrapper pointing to correct subfolder route[cite: 9] */}
+                <Link href={sub.path} style={{ textDecoration: 'none', width: '100%', display: 'block' }}>
+                  <motion.div
+                    whileHover={{ scale: 1.01 }}
+                    whileTap={{ scale: 0.99 }}
+                    style={{
+                      padding: '12px',
+                      width: '100%',
+                      textAlign: 'center',
+                      borderRadius: '0px',
+                      background: sub.color,
+                      color: '#FFFFFF',
+                      fontWeight: 700,
+                      fontSize: '0.9rem',
+                      cursor: 'pointer',
+                      boxShadow: `0 4px 12px ${sub.color}30`,
+                    }}
+                  >
+                    Dive Into Class →
+                  </motion.div>
+                </Link>
+              </motion.div>
+            )
+          })}
         </div>
       </div>
 
@@ -398,19 +378,19 @@ export default function StudentDashboard() {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: '24px', marginBottom: '40px' }}>
         
         {/* Upcoming Classes */}
-        <div style={{ background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: '24px', padding: '24px', boxShadow: '0 4px 16px rgba(37, 99, 235, 0.03)' }}>
+        <div style={{ background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: '0px', padding: '24px', boxShadow: '0 4px 16px rgba(37, 99, 235, 0.03)' }}>
           <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.3rem', fontWeight: 800, color: '#0F172A', marginBottom: '18px', display: 'flex', alignItems: 'center', gap: '10px' }}>
             <IconCalendar /> Upcoming Classes
           </h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             {upcomingClasses.length === 0 ? (
-              <p style={{ color: '#64748B', fontSize: '0.9rem', padding: '24px', background: '#F8FAFC', borderRadius: '16px', textAlign: 'center', border: '1px dashed #CBD5E1', margin: 0 }}>
+              <p style={{ color: '#64748B', fontSize: '0.9rem', padding: '24px', background: '#F8FAFC', borderRadius: '0px', textAlign: 'center', border: '1px dashed #CBD5E1', margin: 0 }}>
                 No upcoming classes scheduled.
               </p>
             ) : (
               upcomingClasses.map((cls) => (
                 <div key={cls.id} style={{
-                  padding: '16px', borderRadius: '16px', background: '#F8FAFC',
+                  padding: '16px', borderRadius: '0px', background: '#F8FAFC',
                   border: '1px solid #E2E8F0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px',
                 }}>
                   <div>
@@ -421,7 +401,7 @@ export default function StudentDashboard() {
                   </div>
                   {cls.meeting_link && (
                     <a href={cls.meeting_link} target="_blank" rel="noreferrer" style={{
-                      padding: '8px 16px', borderRadius: '10px', background: '#2563EB', color: '#FFFFFF',
+                      padding: '8px 16px', borderRadius: '0px', background: '#2563EB', color: '#FFFFFF',
                       fontSize: '0.82rem', fontWeight: 700, textDecoration: 'none', flexShrink: 0, boxShadow: '0 2px 6px rgba(37, 99, 235, 0.2)'
                     }}>
                       Join Class
@@ -434,19 +414,19 @@ export default function StudentDashboard() {
         </div>
 
         {/* Announcements */}
-        <div style={{ background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: '24px', padding: '24px', boxShadow: '0 4px 16px rgba(37, 99, 235, 0.03)' }}>
+        <div style={{ background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: '0px', padding: '24px', boxShadow: '0 4px 16px rgba(37, 99, 235, 0.03)' }}>
           <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.3rem', fontWeight: 800, color: '#0F172A', marginBottom: '18px', display: 'flex', alignItems: 'center', gap: '10px' }}>
             <IconMegaphone /> Announcements
           </h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             {announcements.length === 0 ? (
-              <p style={{ color: '#64748B', fontSize: '0.9rem', padding: '24px', background: '#F8FAFC', borderRadius: '16px', textAlign: 'center', border: '1px dashed #CBD5E1', margin: 0 }}>
+              <p style={{ color: '#64748B', fontSize: '0.9rem', padding: '24px', background: '#F8FAFC', borderRadius: '0px', textAlign: 'center', border: '1px dashed #CBD5E1', margin: 0 }}>
                 No announcements at this time.
               </p>
             ) : (
               announcements.map((ann) => (
                 <div key={ann.id} style={{
-                  padding: '16px', borderRadius: '16px', background: '#F8FAFC',
+                  padding: '16px', borderRadius: '0px', background: '#F8FAFC',
                   border: '1px solid #E2E8F0',
                 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
@@ -463,88 +443,6 @@ export default function StudentDashboard() {
         </div>
 
       </div>
-
-      {/* Grades Section */}
-      <div id="grades" style={{ marginBottom: '40px', background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: '24px', padding: '28px', boxShadow: '0 4px 16px rgba(37, 99, 235, 0.03)' }}>
-        <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.3rem', fontWeight: 800, color: '#0F172A', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <IconClipboard /> My Grades
-        </h2>
-        <div style={{ overflowX: 'auto' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-            <thead>
-              <tr style={{ borderBottom: '2px solid #E2E8F0' }}>
-                {['Subject', 'Assignment', 'Score', 'Feedback'].map(h => (
-                  <th key={h} style={{ textAlign: 'left', padding: '12px 16px', color: '#64748B', fontSize: '0.82rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {grades.length === 0 ? (
-                <tr><td colSpan={4} style={{ padding: '32px 16px', textAlign: 'center', color: '#64748B', fontSize: '0.9rem' }}>No grades recorded yet.</td></tr>
-              ) : (
-                grades.map((g) => {
-                  const ratio = g.max_score > 0 ? g.score / g.max_score : 0
-                  const isPassing = ratio >= 0.7
-                  return (
-                    <tr key={g.id} style={{ borderBottom: '1px solid #F1F5F9' }}>
-                      <td style={{ padding: '16px', color: '#475569', fontSize: '0.9rem', fontWeight: 600 }}>{g.subject?.title || 'General'}</td>
-                      <td style={{ padding: '16px', color: '#0F172A', fontSize: '0.9rem', fontWeight: 700 }}>{g.assignment_title}</td>
-                      <td style={{ padding: '16px' }}>
-                        <span style={{
-                          padding: '6px 12px', borderRadius: '10px', fontSize: '0.85rem', fontWeight: 700,
-                          background: isPassing ? '#ECFDF5' : '#FEF2F2',
-                          color: isPassing ? '#059669' : '#DC2626',
-                          border: `1px solid ${isPassing ? '#A7F3D0' : '#FCA5A5'}`,
-                        }}>
-                          {g.score} / {g.max_score}
-                        </span>
-                      </td>
-                      <td style={{ padding: '16px', color: '#64748B', fontSize: '0.85rem' }}>{g.feedback || '—'}</td>
-                    </tr>
-                  )
-                })
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      {/* Progress Analytics Charts */}
-      <div>
-        <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.3rem', fontWeight: 800, color: '#0F172A', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <IconAnalytics /> Progress Analytics
-        </h2>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: '24px' }}>
-          
-          <div style={{ background: '#FFFFFF', borderRadius: '24px', padding: '24px', border: '1px solid #E2E8F0', boxShadow: '0 4px 16px rgba(37, 99, 235, 0.03)' }}>
-            <h4 style={{ color: '#64748B', fontSize: '0.9rem', fontWeight: 700, marginBottom: '20px' }}>Lessons Completed Over Time</h4>
-            <ResponsiveContainer width="100%" height={220}>
-              <LineChart data={progressData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#F1F5F9" />
-                <XAxis dataKey="week" stroke="#94A3B8" fontSize={12} tickLine={false} />
-                <YAxis stroke="#94A3B8" fontSize={12} tickLine={false} />
-                <Tooltip contentStyle={{ background: '#0F172A', border: '1px solid #334155', borderRadius: '12px', color: '#FFFFFF', boxShadow: '0 10px 25px rgba(0,0,0,0.1)' }} />
-                <Line type="monotone" dataKey="lessons" stroke="#2563EB" strokeWidth={3} dot={{ fill: '#2563EB', r: 5 }} />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-
-          <div style={{ background: '#FFFFFF', borderRadius: '24px', padding: '24px', border: '1px solid #E2E8F0', boxShadow: '0 4px 16px rgba(37, 99, 235, 0.03)' }}>
-            <h4 style={{ color: '#64748B', fontSize: '0.9rem', fontWeight: 700, marginBottom: '20px' }}>Progress by Core Subject (%)</h4>
-            <ResponsiveContainer width="100%" height={220}>
-              <BarChart data={subjectProgress}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#F1F5F9" />
-                <XAxis dataKey="name" stroke="#94A3B8" fontSize={11} tickLine={false} />
-                <YAxis stroke="#94A3B8" fontSize={12} tickLine={false} domain={[0, 100]} />
-                <Tooltip contentStyle={{ background: '#0F172A', border: '1px solid #334155', borderRadius: '12px', color: '#FFFFFF', boxShadow: '0 10px 25px rgba(0,0,0,0.1)' }} />
-                <Bar dataKey="progress" fill="#2563EB" radius={[8, 8, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-
-        </div>
-      </div>
-
     </div>
   )
 }

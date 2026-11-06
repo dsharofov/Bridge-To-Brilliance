@@ -1,10 +1,4 @@
 {
-<<<<<<< HEAD
-  "dependencies": {
-    "react-markdown": "^10.1.0",
-    "rehype-katex": "^7.0.1",
-    "remark-math": "^6.0.0"
-=======
   "name": "bridge-to-brilliance",
   "version": "0.1.0",
   "private": true,
@@ -42,6 +36,5 @@
     "eslint-config-next": "16.1.6",
     "tailwindcss": "^4",
     "typescript": "^5"
->>>>>>> ecfeb91c90ca68b559ea86454c178ae6af3d6a58
   }
 }

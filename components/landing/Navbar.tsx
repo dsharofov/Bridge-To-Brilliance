@@ -4,20 +4,32 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
 import Image from 'next/image'
-import { useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase/client'
+import { usePathname } from 'next/navigation'
 
 export default function Navbar() {
-  const router = useRouter()
+  const pathname = usePathname()
   const [scrolled, setScrolled] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
-  const [showAdminLogin, setShowAdminLogin] = useState(false)
-  const [adminPassword, setAdminPassword] = useState('')
-  const [adminError, setAdminError] = useState('')
-  const [adminLoading, setAdminLoading] = useState(false)
+  const [activeHash, setActiveHash] = useState('')
 
   useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 50)
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 20)
+      const sections = ['about', 'features']
+      const scrollPosition = window.scrollY + 200
+      for (const section of sections) {
+        const el = document.getElementById(section)
+        if (el) {
+          const top = el.offsetTop
+          const height = el.offsetHeight
+          if (scrollPosition >= top && scrollPosition < top + height) {
+            setActiveHash(`#${section}`)
+            return
+          }
+        }
+      }
+      if (window.scrollY < 300) setActiveHash('')
+    }
     window.addEventListener('scroll', handleScroll)
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
@@ -30,26 +42,10 @@ export default function Navbar() {
     return () => window.removeEventListener('resize', handleResize)
   }, [])
 
-  const handleAdminLogin = async () => {
-    setAdminLoading(true)
-    setAdminError('')
-    const supabase = createClient()
-    const { error } = await supabase.auth.signInWithPassword({
-      email: 'admin@bridgetobrilliance.com',
-      password: adminPassword,
-    })
-    setAdminLoading(false)
-    if (error) {
-      setAdminError('Invalid password')
-      return
-    }
-    router.push('/dashboard/admin')
-  }
-
   const navLinks = [
     { href: '#about', label: 'About' },
     { href: '#features', label: 'Features' },
-    { href: '/team', label: 'Team' },
+    { href: '/team', label: 'Staff' },
   ]
 
   return (
@@ -57,216 +53,198 @@ export default function Navbar() {
       <motion.nav
         initial={{ y: -100 }}
         animate={{ y: 0 }}
-        transition={{ duration: 0.6, ease: 'easeOut' }}
+        transition={{ duration: 0.5, ease: 'easeOut' }}
         style={{
           position: 'fixed',
           top: 0,
           left: 0,
           right: 0,
           zIndex: 100,
-          padding: '16px 40px',
+          background: '#FFFFFF',
+          backdropFilter: scrolled ? 'blur(12px)' : 'none',
+          borderBottom: scrolled ? '1px solid #CBD5E1' : '1px solid #E2E8F0',
+          transition: 'background 0.3s ease, border-bottom 0.3s ease',
+          fontFamily: 'var(--font-body), sans-serif',
+          color: '#0F172A',
+          height: '64px',
+        }}
+      >
+        {/* Main Wrapper matching website content container width and padding */}
+        <div style={{
+          maxWidth: '1280px',
+          margin: '0 auto',
+          height: '100%',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          // Sleek dark glass transition matching the dark hero theme
-          background: scrolled ? 'rgba(9, 13, 22, 0.85)' : 'transparent',
-          backdropFilter: scrolled ? 'blur(16px)' : 'none',
-          borderBottom: scrolled ? '1px solid rgba(56, 189, 248, 0.1)' : 'none',
-          transition: 'all 0.3s ease',
-          fontFamily: 'var(--font-body), sans-serif',
-        }}
-      >
-        <Link href="/" style={{ textDecoration: 'none', position: 'relative' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <div style={{
-              width: '36px',
-              height: '36px',
-              borderRadius: '8px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              position: 'relative',
-              background: 'rgba(56, 189, 248, 0.1)',
-              overflow: 'hidden',
-              border: '1px solid rgba(56, 189, 248, 0.2)',
-            }}>
-              <Image src="/pictures/logo.png" alt="BridgeToBrilliance" width={36} height={36} style={{ borderRadius: '8px', objectFit: 'contain' }} />
-              <button
-                onClick={() => setShowAdminLogin(true)}
-                aria-label="Admin Access"
-                style={{
-                  position: 'absolute',
-                  top: 0,
-                  right: 0,
-                  width: '8px',
-                  height: '8px',
-                  borderRadius: '50%',
-                  background: 'rgba(255,255,255,0.15)',
-                  border: 'none',
-                  cursor: 'pointer',
-                  padding: 0,
-                }}
-              />
-            </div>
-            <span style={{
-              fontFamily: 'var(--font-heading)',
-              fontSize: '1.3rem',
-              fontWeight: 700,
-              color: '#38BDF8',
-              letterSpacing: '-0.02em',
-            }}>
-              BridgeToBrilliance
-            </span>
-          </div>
-        </Link>
-
-        <div style={{ display: 'flex', alignItems: 'center', gap: '32px' }}
-          className="desktop-nav">
-          {navLinks.map(link => (
-            link.href.startsWith('/') ? (
-              <Link key={link.href} href={link.href} style={{ color: '#94A3B8', textDecoration: 'none', fontSize: '0.9rem', fontWeight: 500, transition: 'color 0.2s' }}>{link.label}</Link>
-            ) : (
-              <a key={link.href} href={link.href} style={{ color: '#94A3B8', textDecoration: 'none', fontSize: '0.9rem', fontWeight: 500, transition: 'color 0.2s' }}>{link.label}</a>
-            )
-          ))}
-          <Link href="/login" style={{ color: '#F8FAFC', textDecoration: 'none', fontSize: '0.9rem', fontWeight: 600 }}>Sign In</Link>
-          <Link href="/register">
-            <button style={{
-              background: 'linear-gradient(135deg, #3B82F6, #1D4ED8)',
-              color: 'white',
-              border: 'none',
-              padding: '10px 20px',
-              fontSize: '0.85rem',
-              fontWeight: 600,
-              borderRadius: '12px',
-              cursor: 'pointer',
-              boxShadow: '0 4px 14px rgba(59, 130, 246, 0.3)',
-              transition: 'transform 0.2s, box-shadow 0.2s',
-            }}>
-              Get Started
-            </button>
-          </Link>
-        </div>
-
-        <button
-          onClick={() => setMobileOpen(!mobileOpen)}
-          aria-label="Toggle menu"
-          className="mobile-menu-btn"
-          style={{
-            display: 'none',
-            background: 'none',
-            border: 'none',
-            color: '#F8FAFC',
-            fontSize: '1.5rem',
-            cursor: 'pointer',
-            padding: '4px',
-            zIndex: 110,
-          }}
-        >
-          {mobileOpen ? '✕' : '☰'}
-        </button>
-      </motion.nav>
-
-      {/* Admin Login Modal */}
-      <AnimatePresence>
-        {showAdminLogin && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={() => { setShowAdminLogin(false); setAdminError(''); setAdminPassword('') }}
-            style={{
-              position: 'fixed',
-              inset: 0,
-              background: 'rgba(0,0,0,0.8)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              zIndex: 200,
-              padding: '20px',
-            }}
-          >
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              onClick={(e) => e.stopPropagation()}
-              style={{
-                background: '#0F172A',
-                border: '1px solid rgba(56, 189, 248, 0.2)',
-                borderRadius: '20px',
-                padding: '32px',
-                width: '100%',
-                maxWidth: '400px',
+          padding: '0 5px',
+        }}>
+          
+          {/* Left: Logo & Nav Links Group */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '48px' }}>
+            <Link 
+              href="/" 
+              style={{ 
+                textDecoration: 'none', 
+                display: 'flex', 
+                alignItems: 'center',
               }}
             >
-              <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.3rem', color: '#F8FAFC', marginBottom: '8px' }}>
-                Admin Access
-              </h2>
-              <p style={{ fontSize: '0.85rem', color: '#94A3B8', marginBottom: '24px' }}>
-                Enter admin password to continue
-              </p>
-              <input
-                type="password"
-                value={adminPassword}
-                onChange={(e) => { setAdminPassword(e.target.value); setAdminError('') }}
-                onKeyDown={(e) => { if (e.key === 'Enter') handleAdminLogin() }}
-                placeholder="Password"
-                autoFocus
+              <motion.div
+                whileHover={{ scale: 0.98 }}
+                whileTap={{ scale: 0.98 }}
                 style={{
-                  width: '100%',
-                  padding: '12px 16px',
-                  borderRadius: '10px',
-                  background: 'rgba(255,255,255,0.05)',
-                  border: `1px solid ${adminError ? '#ef4444' : 'rgba(56, 189, 248, 0.2)'}`,
-                  color: '#F8FAFC',
-                  fontSize: '0.9rem',
-                  outline: 'none',
-                  boxSizing: 'border-box',
-                  marginBottom: adminError ? '8px' : '16px',
+                  position: 'relative',
+                  width: '52px',
+                  height: '52px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
                 }}
-              />
-              {adminError && (
-                <p style={{ fontSize: '0.8rem', color: '#ef4444', marginBottom: '12px' }}>{adminError}</p>
-              )}
-              <div style={{ display: 'flex', gap: '12px' }}>
-                <button
-                  onClick={() => { setShowAdminLogin(false); setAdminError(''); setAdminPassword('') }}
-                  style={{
-                    flex: 1,
-                    padding: '12px',
-                    borderRadius: '10px',
-                    background: 'rgba(255,255,255,0.05)',
-                    border: '1px solid rgba(255,255,255,0.1)',
-                    color: '#94A3B8',
-                    fontSize: '0.9rem',
-                    cursor: 'pointer',
-                  }}
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleAdminLogin}
-                  disabled={adminLoading || !adminPassword}
-                  style={{
-                    flex: 1,
-                    padding: '12px',
-                    borderRadius: '10px',
-                    border: 'none',
-                    background: adminPassword ? 'linear-gradient(135deg, #3B82F6, #1D4ED8)' : 'rgba(255,255,255,0.05)',
-                    color: adminPassword ? 'white' : '#64748B',
-                    fontSize: '0.9rem',
-                    fontWeight: 600,
-                    cursor: adminPassword ? 'pointer' : 'default',
-                  }}
-                >
-                  {adminLoading ? 'Signing in...' : 'Sign In'}
-                </button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+              >
+                <Image 
+                  src="/pictures/7925bd32-d73a-411d-ab2a-1a6aaefc0df1 (1).png" 
+                  alt="BridgeToBrilliance Logo" 
+                  fill
+                  sizes="100px"
+                  priority
+                  style={{ objectFit: 'contain' }} 
+                />
+              </motion.div>
+            </Link>
+
+            {/* Desktop Navigation Links */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '32px' }} className="desktop-nav">
+              {navLinks.map(link => {
+                const isActive = link.href.startsWith('/') ? pathname === link.href : activeHash === link.href
+                return (
+                  <div key={link.href} style={{ position: 'relative', padding: '6px 0' }}>
+                    {link.href.startsWith('/') ? (
+                      <Link 
+                        href={link.href} 
+                        style={{ 
+                          color: '#003E6B', 
+                          textDecoration: 'none', 
+                          fontSize: '0.85rem', 
+                          fontWeight: 700, 
+                          letterSpacing: '0.08em', 
+                          transition: 'color 0.2s' 
+                        }}
+                      >
+                        {link.label.toUpperCase()}
+                      </Link>
+                    ) : (
+                      <a 
+                        href={link.href} 
+                        onClick={() => setActiveHash(link.href)} 
+                        style={{ 
+                          color: '#003E6B', 
+                          textDecoration: 'none', 
+                          fontSize: '0.85rem', 
+                          fontWeight: 700, 
+                          letterSpacing: '0.08em', 
+                          transition: 'color 0.2s' 
+                        }}
+                      >
+                        {link.label.toUpperCase()}
+                      </a>
+                    )}
+                    {isActive && (
+                      <motion.div
+                        layoutId="activeIndicator"
+                        style={{
+                          position: 'absolute',
+                          bottom: -2,
+                          left: 0,
+                          right: 0,
+                          height: '2px',
+                          background: '#003E6B',
+                        }}
+                        transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+                      />
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+
+          {/* Right: Profile Icon & Auth Links (Log In / Sign Up) */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }} className="desktop-top-auth">
+            {/* Profile Icon Link */}
+            <Link 
+              href="/login" 
+              style={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                justifyContent: 'center', 
+                color: '#003E6B',
+                textDecoration: 'none',
+                background: '#F1F5F9',
+                borderRadius: '0px',
+                width: '32px',
+                height: '32px',
+                transition: 'background 0.2s ease',
+              }}
+              title="User Account"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+              </svg>
+            </Link>
+
+            <Link 
+              href="/login" 
+              style={{ 
+                color: '#475569', 
+                textDecoration: 'none', 
+                fontSize: '0.8rem', 
+                fontWeight: 700, 
+                letterSpacing: '0.08em', 
+                transition: 'color 0.2s' 
+              }}
+            >
+              LOG IN
+            </Link>
+            <span style={{ color: '#CBD5E1', fontSize: '0.8rem' }}>|</span>
+            <Link 
+              href="/register" 
+              style={{ 
+                color: '#003E6B', 
+                textDecoration: 'none', 
+                fontSize: '0.8rem', 
+                fontWeight: 700, 
+                letterSpacing: '0.08em', 
+                transition: 'color 0.2s' 
+              }}
+            >
+              SIGN UP
+            </Link>
+          </div>
+
+          {/* Mobile Menu Toggle Button */}
+          <motion.button
+            whileTap={{ scale: 0.95 }}
+            onClick={() => setMobileOpen(!mobileOpen)}
+            aria-label="Toggle menu"
+            className="mobile-menu-btn"
+            style={{
+              display: 'none',
+              background: '#F8FAFC',
+              border: '1px solid #CBD5E1',
+              borderRadius: '0px',
+              color: '#0F172A',
+              fontSize: '1rem',
+              cursor: 'pointer',
+              padding: '6px 10px',
+            }}
+          >
+            {mobileOpen ? '✕' : '☰'}
+          </motion.button>
+
+        </div>
+      </motion.nav>
 
       {/* Mobile Drawer Menu */}
       <AnimatePresence>
@@ -282,16 +260,50 @@ export default function Navbar() {
               right: 0,
               bottom: 0,
               width: '280px',
-              background: '#0F172A',
-              backdropFilter: 'blur(20px)',
+              background: '#FFFFFF',
               zIndex: 99,
               display: 'flex',
               flexDirection: 'column',
-              padding: '100px 32px 32px',
-              gap: '8px',
-              borderLeft: '1px solid rgba(56, 189, 248, 0.1)',
+              padding: '80px 24px 32px',
+              gap: '12px',
+              borderLeft: '1px solid #CBD5E1',
+              boxShadow: '-10px 0 30px rgba(15, 23, 42, 0.1)',
             }}
           >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 10px', color: '#0F172A' }}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+              </svg>
+              <span style={{ fontWeight: 600, fontSize: '0.95rem' }}>Account</span>
+            </div>
+            <Link
+              href="/login"
+              onClick={() => setMobileOpen(false)}
+              style={{
+                color: '#475569',
+                textDecoration: 'none',
+                fontSize: '0.95rem',
+                fontWeight: 600,
+                padding: '10px 14px',
+              }}
+            >
+              Log In
+            </Link>
+            <Link
+              href="/register"
+              onClick={() => setMobileOpen(false)}
+              style={{
+                color: '#2563EB',
+                textDecoration: 'none',
+                fontSize: '0.95rem',
+                fontWeight: 600,
+                padding: '10px 14px',
+              }}
+            >
+              Sign Up
+            </Link>
+            <div style={{ borderTop: '1px solid #E2E8F0', margin: '8px 0' }} />
             {navLinks.map(link => (
               link.href.startsWith('/') ? (
                 <Link
@@ -299,13 +311,13 @@ export default function Navbar() {
                   href={link.href}
                   onClick={() => setMobileOpen(false)}
                   style={{
-                    color: '#94A3B8',
+                    color: '#0F172A',
                     textDecoration: 'none',
-                    fontSize: '1.1rem',
-                    fontWeight: 500,
-                    padding: '14px 16px',
-                    borderRadius: '10px',
-                    transition: 'background 0.2s',
+                    fontSize: '1rem',
+                    fontWeight: 600,
+                    padding: '10px 14px',
+                    background: pathname === link.href ? '#EFF6FF' : 'transparent',
+                    borderLeft: pathname === link.href ? '3px solid #2563EB' : '3px solid transparent',
                   }}
                 >
                   {link.label}
@@ -316,51 +328,17 @@ export default function Navbar() {
                   href={link.href}
                   onClick={() => setMobileOpen(false)}
                   style={{
-                    color: '#94A3B8',
+                    color: '#0F172A',
                     textDecoration: 'none',
-                    fontSize: '1.1rem',
-                    fontWeight: 500,
-                    padding: '14px 16px',
-                    borderRadius: '10px',
-                    transition: 'background 0.2s',
+                    fontSize: '1rem',
+                    fontWeight: 600,
+                    padding: '10px 14px',
                   }}
                 >
                   {link.label}
                 </a>
               )
             ))}
-            <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)', margin: '12px 0' }} />
-            <Link
-              href="/login"
-              onClick={() => setMobileOpen(false)}
-              style={{
-                color: '#F8FAFC',
-                textDecoration: 'none',
-                fontSize: '1rem',
-                fontWeight: 600,
-                padding: '14px 16px',
-                borderRadius: '10px',
-              }}
-            >
-              Sign In
-            </Link>
-            <Link href="/register" onClick={() => setMobileOpen(false)}>
-              <button style={{
-                width: '100%',
-                background: 'linear-gradient(135deg, #3B82F6, #1D4ED8)',
-                color: 'white',
-                border: 'none',
-                padding: '14px 20px',
-                fontSize: '0.95rem',
-                fontWeight: 600,
-                borderRadius: '12px',
-                cursor: 'pointer',
-                marginTop: '8px',
-                boxShadow: '0 4px 14px rgba(59, 130, 246, 0.3)',
-              }}>
-                Get Started
-              </button>
-            </Link>
           </motion.div>
         )}
       </AnimatePresence>
@@ -375,7 +353,7 @@ export default function Navbar() {
             style={{
               position: 'fixed',
               inset: 0,
-              background: 'rgba(0,0,0,0.5)',
+              background: 'rgba(15, 23, 42, 0.4)',
               zIndex: 98,
             }}
           />
@@ -385,7 +363,8 @@ export default function Navbar() {
       <style jsx global>{`
         @media (max-width: 768px) {
           .desktop-nav { display: none !important; }
-          .mobile-menu-btn { display: block !important; }
+          .desktop-top-auth { display: none !important; }
+          .mobile-menu-btn { display: flex !important; align-items: center; justify-content: center; }
         }
       `}</style>
     </>
