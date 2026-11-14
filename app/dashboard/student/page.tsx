@@ -20,7 +20,6 @@ type Lesson = {
 }
 
 type QuizQuestion = {
-
   id: string
   question_text: string
   options: string[]
@@ -68,7 +67,7 @@ type ClassMaterial = {
   student_notes?: string
 }
 
-export default function MathStudentPortal() {
+export default function StudentPortal() {
   const profile = useProfile()
   const supabase = createClient()
 
@@ -87,7 +86,7 @@ export default function MathStudentPortal() {
   const [playlistSearchQuery, setPlaylistSearchQuery] = useState('')
   const [playlistTopicQuery, setPlaylistTopicQuery] = useState('')
   const [playlistInstructorQuery, setPlaylistInstructorQuery] = useState('')
-  const [lessonSortOrder, setLessonSortOrder] = useState<'newest' | 'oldest'>('newest') // <-- Added sort filter state
+  const [lessonSortOrder, setLessonSortOrder] = useState<'newest' | 'oldest'>('newest')
 
   // Messaging & Context Menu State 
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null)
@@ -107,7 +106,7 @@ export default function MathStudentPortal() {
   const [keywordInputs, setKeywordInputs] = useState<{ [lessonId: string]: string }>({})
   const [errorMessages, setErrorMessages] = useState<{ [lessonId: string]: string }>({})
 
-  // 10-Star Rating State
+  // Rating State
   const [lessonRatings, setLessonRatings] = useState<{ [lessonId: string]: number }>({})
   const [hasVoted, setHasVoted] = useState<{ [lessonId: string]: boolean }>({})
   const [communityRatings, setCommunityRatings] = useState<{ [lessonId: string]: { total: number; count: number } }>({})
@@ -118,12 +117,12 @@ export default function MathStudentPortal() {
   const [userAnswers, setUserAnswers] = useState<{ [qIndex: number]: number }>({})
   const [submittedAttempt, setSubmittedAttempt] = useState<{ score: number; passed: boolean; answers: { [key: number]: number }; feedback?: string } | null>(null)
 
-  const storageKey = profile ? `math_unlocked_lessons_${profile.id || profile.email || 'student'}` : 'math_unlocked_lessons_default'
-  const ratingStorageKey = profile ? `math_lesson_ratings_${profile.id}` : 'math_lesson_ratings_default'
-  const votedStorageKey = profile ? `math_voted_lessons_${profile.id}` : 'math_voted_lessons_default'
-  const communityStorageKey = 'math_community_ratings_global_v3'
+  const storageKey = profile ? `student_unlocked_lessons_${profile.id || profile.email || 'student'}` : 'student_unlocked_lessons_default'
+  const ratingStorageKey = profile ? `student_lesson_ratings_${profile.id}` : 'student_lesson_ratings_default'
+  const votedStorageKey = profile ? `student_voted_lessons_${profile.id}` : 'student_voted_lessons_default'
+  const communityStorageKey = 'student_community_ratings_global_v3'
   const visitStorageKey = profile ? `last_visited_chats_${profile.id}` : 'last_visited_chats_default'
-  const quizAttemptStorageKey = profile ? `math_quiz_attempts_${profile.id}` : 'math_quiz_attempts_default'
+  const quizAttemptStorageKey = profile ? `student_quiz_attempts_${profile.id}` : 'student_quiz_attempts_default'
 
   useEffect(() => {
     const savedUnlocked = localStorage.getItem(storageKey)
@@ -135,16 +134,16 @@ export default function MathStudentPortal() {
     const savedVoted = localStorage.getItem(votedStorageKey)
     if (savedVoted) { try { setHasVoted(JSON.parse(savedVoted)) } catch (e) { console.error(e) } }
 
-    const savedCommunity = localStorage.getItem(communityStorageKey) || localStorage.getItem('math_global_community_ratings_v1')
+    const savedCommunity = localStorage.getItem(communityStorageKey) || localStorage.getItem('global_community_ratings_v1')
     if (savedCommunity) { try { setCommunityRatings(JSON.parse(savedCommunity)) } catch (e) { console.error(e) } }
 
     const savedVisits = localStorage.getItem(visitStorageKey)
     if (savedVisits) { try { setLastVisitedMap(JSON.parse(savedVisits)) } catch (e) { console.error(e) } }
 
-    const savedQuizzes = localStorage.getItem('math_quizzes_global_v3') || localStorage.getItem('math_quizzes_global_v2') || localStorage.getItem('math_quizzes_global_v1')
+    const savedQuizzes = localStorage.getItem('quizzes_global_v3') || localStorage.getItem('quizzes_global_v2') || localStorage.getItem('quizzes_global_v1')
     if (savedQuizzes) { try { setQuizzes(JSON.parse(savedQuizzes)) } catch (e) { console.error(e) } }
 
-    const savedAttempts = localStorage.getItem('math_quiz_attempts_global_v3') || localStorage.getItem(quizAttemptStorageKey)
+    const savedAttempts = localStorage.getItem('quiz_attempts_global_v3') || localStorage.getItem(quizAttemptStorageKey)
     if (savedAttempts) { try { setQuizAttempts(JSON.parse(savedAttempts)) } catch (e) { console.error(e) } }
   }, [storageKey, ratingStorageKey, votedStorageKey, communityStorageKey, visitStorageKey, quizAttemptStorageKey])
 
@@ -185,12 +184,9 @@ export default function MathStudentPortal() {
         let dbAttempts: QuizAttempt[] = []
 
         try {
-          const { data: subjectsData } = await supabase.from('subjects').select('id').ilike('title', '%math%')
-          const mathSubjectIds = subjectsData ? subjectsData.map((s: any) => s.id) : []
-          if (mathSubjectIds.length > 0) {
-            const { data: lData } = await supabase.from('lessons').select('*').in('subject_id', mathSubjectIds).order('created_at', { ascending: true })
-            if (lData) lessonData = lData as Lesson[]
-          }
+          // Fetch ALL lessons across all subjects instead of filtering exclusively by math
+          const { data: lData } = await supabase.from('lessons').select('*').order('created_at', { ascending: true })
+          if (lData) lessonData = lData as Lesson[]
         } catch (e) { console.error('Error fetching lessons', e) }
 
         try {
@@ -243,7 +239,7 @@ export default function MathStudentPortal() {
         if (dbQuizzes.length > 0) setQuizzes(dbQuizzes)
         if (dbAttempts.length > 0) {
           setQuizAttempts(dbAttempts)
-          localStorage.setItem('math_quiz_attempts_global_v3', JSON.stringify(dbAttempts))
+          localStorage.setItem('quiz_attempts_global_v3', JSON.stringify(dbAttempts))
         }
       } catch (err) {
         console.error('Data fetch error:', err)
@@ -254,7 +250,7 @@ export default function MathStudentPortal() {
     fetchData()
 
     const channel = supabase
-      .channel('public:direct_messages_student')
+      .channel('public:direct_messages_student_portal')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'direct_messages' }, (payload: any) => {
         if (payload.eventType === 'INSERT' && profile) {
           const newMsg = payload.new as Message
@@ -376,7 +372,7 @@ export default function MathStudentPortal() {
     const newAttempt: QuizAttempt = { id: savedAttemptId, ...newAttemptPayload }
     const updatedAttempts = [...quizAttempts, newAttempt]
     setQuizAttempts(updatedAttempts)
-    localStorage.setItem('math_quiz_attempts_global_v3', JSON.stringify(updatedAttempts))
+    localStorage.setItem('quiz_attempts_global_v3', JSON.stringify(updatedAttempts))
     localStorage.setItem(quizAttemptStorageKey, JSON.stringify(updatedAttempts))
     setSubmittedAttempt({ score: scorePercent, passed, answers: userAnswers })
   }
@@ -385,7 +381,7 @@ export default function MathStudentPortal() {
 
   const playlistsMap: { [moduleName: string]: Lesson[] } = {}
   lessons.forEach(l => {
-    const modName = l.playlist || 'General Mathematics'
+    const modName = l.playlist || 'General Curriculum'
     if (!playlistsMap[modName]) playlistsMap[modName] = []
     playlistsMap[modName].push(l)
   })
@@ -399,7 +395,6 @@ export default function MathStudentPortal() {
   })
 
   const validUnlockedCount = lessons.length > 0 ? unlockedLessonIds.filter(id => lessons.some(l => l.id === id)).length : 0
-
   const progressPercent = lessons.length > 0 ? Math.min(100, Math.round((validUnlockedCount / lessons.length) * 100)) : 0
 
   if (loading) return <div style={{ display: 'flex', justifyContent: 'center', paddingTop: '100px' }}><div className="spinner" /></div>
@@ -412,16 +407,13 @@ export default function MathStudentPortal() {
   return (
     <div style={{ paddingBottom: '60px', fontFamily: 'var(--font-body), sans-serif', maxWidth: '1100px', margin: '0 auto', color: '#0F172A' }} onClick={() => setContextMenu(null)}>
       
-      {/* Repeating Top YouTube Style Math Pattern Banner */}
+      {/* Top Banner */}
       <div 
         style={{
           width: '100%',
           height: '140px',
-          backgroundImage: 'url(/pictures/mathematics-icons-blue-seamless-pattern-vector-3006374.avif)',
-          backgroundRepeat: 'repeat',
-          backgroundSize: '300px 300px',
-          backgroundPosition: 'top left',
-          borderBottom: '3px solid #003366',
+          background: '#003366',
+          borderBottom: '3px solid #002244',
           boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
           marginBottom: '24px'
         }}
@@ -435,10 +427,10 @@ export default function MathStudentPortal() {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '20px', marginBottom: '20px' }}>
           <div>
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '4px 12px', background: '#E3F2FD', border: '1px solid #90CAF9', color: '#003366', fontSize: '0.78rem', fontWeight: 800, marginBottom: '10px' }}>
-              Math Workstation
+              Student Workstation
             </div>
             <h1 style={{ fontFamily: 'var(--font-heading)', fontSize: '2.2rem', fontWeight: 800, color: '#0F172A', margin: 0 }}>
-              Mathematics Curriculum Portal
+              Curriculum & Learning Portal
             </h1>
           </div>
         </div>
@@ -488,7 +480,7 @@ export default function MathStudentPortal() {
               <div style={{ marginBottom: '20px' }}>
                 <input
                   type="text"
-                  placeholder="Search math playlists & modules by topic or keyword..."
+                  placeholder="Search playlists & modules by topic or keyword..."
                   value={playlistSearchQuery}
                   onChange={e => setPlaylistSearchQuery(e.target.value)}
                   style={{ width: '100%', padding: '12px 16px', border: '1px solid #CBD5E1', background: '#FFF', fontSize: '0.9rem', outline: 'none', boxSizing: 'border-box' }}
@@ -544,7 +536,6 @@ export default function MathStudentPortal() {
                 <input type="text" placeholder="Search topic..." value={playlistTopicQuery} onChange={e => setPlaylistTopicQuery(e.target.value)} style={{ padding: '10px 14px', background: '#FFF', border: '1px solid #CBD5E1', outline: 'none', fontSize: '0.88rem' }} />
                 <input type="text" placeholder="Search teacher..." value={playlistInstructorQuery} onChange={e => setPlaylistInstructorQuery(e.target.value)} style={{ padding: '10px 14px', background: '#FFF', border: '1px solid #CBD5E1', outline: 'none', fontSize: '0.88rem' }} />
                 
-                {/* Sort Order Selector */}
                 <select 
                   value={lessonSortOrder} 
                   onChange={e => setLessonSortOrder(e.target.value as 'newest' | 'oldest')}
@@ -805,7 +796,7 @@ export default function MathStudentPortal() {
           {!activeQuiz ? (
             <div>
               <p style={{ color: '#64748B', fontSize: '0.9rem', marginBottom: '20px' }}>
-                Take teacher-assigned mathematical quizzes to evaluate, reinforce, and solidify your concept mastery.
+                Take teacher-assigned quizzes to evaluate, reinforce, and solidify your concept mastery.
               </p>
 
               {quizzes.length === 0 ? (
