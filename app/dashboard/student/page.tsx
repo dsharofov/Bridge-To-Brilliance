@@ -1,161 +1,403 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { motion } from 'framer-motion'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
-import { useRouter } from 'next/navigation'
+import { useProfile } from '../layout'
 
-type Profile = {
-  id: string
-  full_name: string | null
-  email: string | null
-  role: string
-}
-
-type Subject = {
+type Announcement = {
   id: string
   title: string
-  description: string
-  teacher_name?: string
-  icon?: string
+  body: string
+  created_at: string
 }
 
-export default function StudentDashboardPage() {
-  const [profile, setProfile] = useState<Profile | null>(null)
-  const [subjects, setSubjects] = useState<Subject[]>([])
-  const [loading, setLoading] = useState(true)
+type ClassWithSubject = {
+  id: string
+  title: string
+  scheduled_at: string
+  meeting_link?: string | null
+  subject?: { title: string } | null
+}
+
+// --- Minimalist Vector SVG Icons Library matching Teacher Dashboard ---
+function IconMath() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="square" strokeLinejoin="miter">
+      <line x1="4" y1="20" x2="20" y2="4"></line>
+      <polyline points="4 4 20 4 20 20"></polyline>
+    </svg>
+  )
+}
+
+function IconComputerScience() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="square" strokeLinejoin="miter">
+      <polyline points="16 18 22 12 16 6"></polyline>
+      <polyline points="8 6 2 12 8 18"></polyline>
+      <line x1="13.5" y1="4" x2="10.5" y2="20"></line>
+    </svg>
+  )
+}
+
+function IconPhysics() {
+  return (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="2.2" fill="currentColor"></circle>
+      <ellipse cx="12" cy="12" rx="10" ry="3.2" transform="rotate(0 12 12)"></ellipse>
+      <ellipse cx="12" cy="12" rx="10" ry="3.2" transform="rotate(60 12 12)"></ellipse>
+      <ellipse cx="12" cy="12" rx="10" ry="3.2" transform="rotate(120 12 12)"></ellipse>
+    </svg>
+  )
+}
+
+function IconBiology() {
+  return (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M6 4c0 3 4 6 6 8-2 2-6 5-6 8"></path>
+      <path d="M18 4c0 3-4 6-6 8 2 2 6 5 6 8"></path>
+      <circle cx="12" cy="12" r="2" fill="currentColor"></circle>
+    </svg>
+  )
+}
+
+function IconChemistry() {
+  return (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M9 2h6v4l5 14a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1l5-14V2z"></path>
+      <line x1="7" y1="13" x2="17" y2="13"></line>
+      <circle cx="12" cy="17" r="1" fill="currentColor"></circle>
+      <circle cx="10" cy="15" r="0.8" fill="currentColor"></circle>
+    </svg>
+  )
+}
+
+function IconEnglish() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="square" strokeLinejoin="miter">
+      <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+      <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+    </svg>
+  )
+}
+
+const coreSubjects = [
+  { id: 'math', title: 'Math', path: '/dashboard/student/math', icon: <IconMath />, desc: 'Advanced calculus, algebra, geometry, and competitive Olympiad problem solving.', color: '#1565C0', bg: '#E3F2FD' },
+  { id: 'computer-science', title: 'Computer Science', path: '/dashboard/student/computer-science', icon: <IconComputerScience />, desc: 'Algorithms, data structures, C++ standard template libraries, and full-stack web development.', color: '#6A1B9A', bg: '#F3E5F5' },
+  { id: 'physics', title: 'Physics', path: '/dashboard/student/physics', icon: <IconPhysics />, desc: 'Classical mechanics, horizontal projectile motion, electromagnetism, and physical equations.', color: '#9B59B6', bg: '#F4ECF7' },
+  { id: 'biology', title: 'Biology', path: '/dashboard/student/biology', icon: <IconBiology />, desc: 'Cellular structures, genetics, organic matter classification, and ecological systems.', color: '#2E7D32', bg: '#E8F5E9' },
+  { id: 'chemistry', title: 'Chemistry', path: '/dashboard/student/chemistry', icon: <IconChemistry />, desc: 'Atomic structures, chemical bonding mechanisms, stoichiometry, and periodic trends.', color: '#FFB300', bg: '#FFF8E1' },
+  { id: 'english', title: 'English', path: '/dashboard/student/english', icon: <IconEnglish />, desc: 'IELTS writing preparation, critical literary analysis, essays, and global communication.', color: '#C62828', bg: '#FFEBEE' },
+]
+
+function IconHandWave() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="square" strokeLinejoin="miter">
+      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+      <circle cx="12" cy="7" r="4"></circle>
+    </svg>
+  )
+}
+
+function IconBookCollection() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="square" strokeLinejoin="miter">
+      <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+      <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+    </svg>
+  )
+}
+
+function IconCalendar() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="square" strokeLinejoin="miter">
+      <rect x="3" y="4" width="18" height="18" rx="0"></rect>
+      <line x1="16" y1="2" x2="16" y2="6"></line>
+      <line x1="8" y1="2" x2="8" y2="6"></line>
+      <line x1="3" y1="10" x2="21" y2="10"></line>
+    </svg>
+  )
+}
+
+function IconMegaphone() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="square" strokeLinejoin="miter">
+      <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+      <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+    </svg>
+  )
+}
+
+export default function StudentDashboard() {
+  const profile = useProfile()
   const supabase = createClient()
-  const router = useRouter()
+
+  const [announcements, setAnnouncements] = useState<Announcement[]>([])
+  const [upcomingClasses, setUpcomingClasses] = useState<ClassWithSubject[]>([])
+  const [dbSubjects, setDbSubjects] = useState<any[]>([])
+  const [dbProfiles, setDbProfiles] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const fetchStudentData = async () => {
+    if (!profile) {
+      setLoading(false)
+      return
+    }
+
+    let cancelled = false
+    const fetchData = async () => {
       try {
-        const { data: { user } } = await supabase.auth.getUser()
-        if (!user) {
-          router.push('/auth/login')
-          return
-        }
+        const [
+          { data: annData },
+          { data: classData },
+          { data: subData, error: subError },
+          { data: profData, error: profError },
+        ] = await Promise.all([
+          supabase.from('announcements').select('*').order('created_at', { ascending: false }).limit(5),
+          supabase.from('classes').select('*, subject:subjects(title)').gte('scheduled_at', new Date().toISOString()).order('scheduled_at', { ascending: true }).limit(5),
+          supabase.from('subjects').select('*'),
+          supabase.from('profiles').select('*'),
+        ])
 
-        const { data: profileData } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', user.id)
-          .single()
+        if (cancelled) return
 
-        if (profileData) {
-          setProfile(profileData)
-        }
+        if (subError) console.error('Subject fetch error:', subError.message)
+        if (profError) console.error('Profile fetch error:', profError.message)
 
-        const { data: subjectsData } = await supabase
-          .from('subjects')
-          .select('*')
-          .order('title', { ascending: true })
-
-        if (subjectsData) {
-          setSubjects(subjectsData)
-        }
-      } catch (err) {
-        console.error('Error loading student dashboard:', err)
+        if (annData) setAnnouncements(annData)
+        if (classData) setUpcomingClasses(classData as ClassWithSubject[])
+        if (subData) setDbSubjects(subData)
+        if (profData) setDbProfiles(profData)
+      } catch (err: any) {
+        console.error('Dashboard fetch exception:', err)
       } finally {
-        setLoading(false)
+        if (!cancelled) setLoading(false)
       }
     }
 
-    fetchStudentData()
-  }, [supabase, router])
+    fetchData()
+    return () => {
+      cancelled = true
+    }
+  }, [profile, supabase])
 
   if (loading) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
+      <div style={{ display: 'flex', justifyContent: 'center', paddingTop: '80px' }}>
         <div className="spinner" />
       </div>
     )
   }
 
+  const firstName = profile?.full_name?.split(' ')[0] || 'Student'
+
   return (
-    <div style={{ paddingBottom: '60px', fontFamily: 'var(--font-body), sans-serif', maxWidth: '1100px', margin: '0 auto', color: '#0F172A' }}>
+    <div style={{ width: '100%', maxWidth: '1400px', margin: '0 auto', paddingBottom: '60px' }}>
       
-      {/* Welcome Banner */}
-      <div style={{ background: '#003366', color: '#FFF', padding: '32px 36px', marginBottom: '32px', boxShadow: '0 4px 20px rgba(0,51,102,0.1)' }}>
-        <div style={{ fontSize: '0.8rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '8px', color: '#90CAF9' }}>
-          Student Portal Workstation
+      {/* Welcome Hero Banner */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        style={{
+          background: '#FFFFFF',
+          border: '1px solid #E2E8F0',
+          borderLeft: '4px solid #2563EB',
+          borderRadius: '0px',
+          padding: '36px',
+          marginBottom: '36px',
+          boxShadow: '0 10px 30px rgba(37, 99, 235, 0.04)',
+        }}
+      >
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '4px 12px', borderRadius: '0px', background: '#EFF6FF', border: '1px solid #BFDBFE', color: '#2563EB', fontSize: '0.8rem', fontWeight: 700, marginBottom: '12px' }}>
+          <IconHandWave /> Student Portal
         </div>
-        <h1 style={{ fontFamily: 'var(--font-heading)', fontSize: '2.2rem', fontWeight: 800, margin: '0 0 8px 0' }}>
-          Welcome back, {profile?.full_name || 'Student'}!
+        <h1 style={{ fontFamily: 'var(--font-heading)', fontSize: '2.2rem', fontWeight: 800, color: '#0F172A', marginBottom: '8px' }}>
+          Welcome back, {firstName}!
         </h1>
-        <p style={{ fontSize: '0.95rem', color: 'rgba(255,255,255,0.85)', margin: 0, maxWidth: '600px' }}>
-          Select a subject curriculum below to access your video playlists, interactive quizzes, class stream materials, and direct communication with instructors.
+        <p style={{ fontSize: '1rem', color: '#475569', margin: 0 }}>
+          Explore your core subjects, view your assigned instructors, and stay on top of upcoming classes.
         </p>
-      </div>
+      </motion.div>
 
-      {/* Subjects Grid */}
-      <div style={{ marginBottom: '24px' }}>
-        <h2 style={{ fontSize: '1.3rem', fontWeight: 800, color: '#0F172A', marginBottom: '16px' }}>
-          Enrolled Subjects & Portals
-        </h2>
+      {/* Core Subjects Section */}
+      <div id="subjects" style={{ marginBottom: '40px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+          <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.4rem', fontWeight: 800, color: '#0F172A', margin: 0, display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <IconBookCollection /> Core Subjects & Instructors
+          </h2>
+        </div>
 
-        {subjects.length === 0 ? (
-          <div style={{ background: '#FFF', border: '1px solid #E2E8F0', padding: '48px', textAlign: 'center', color: '#64748B' }}>
-            No subjects published yet. Please check back soon or contact administration.
-          </div>
-        ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '24px' }}>
-            {subjects.map((sub) => {
-              const isMath = sub.title.toLowerCase().includes('math')
-              const portalLink = isMath ? '/dashboard/student/math' : `/dashboard/student/${sub.id}`
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: '24px' }}>
+          {coreSubjects.map((sub, i) => {
+            const matchingSubs = dbSubjects.filter(
+              s => s.title && s.title.toLowerCase().trim() === sub.title.toLowerCase().trim()
+            )
 
-              return (
-                <div 
-                  key={sub.id} 
-                  style={{ 
-                    background: '#FFF', 
-                    border: '1px solid #E2E8F0', 
-                    borderTop: '6px solid #003366', 
-                    padding: '24px', 
-                    boxShadow: '0 4px 16px rgba(15,23,42,0.04)',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    justifyContent: 'space-between'
-                  }}
-                >
-                  <div>
-                    <div style={{ fontSize: '0.75rem', fontWeight: 800, color: '#003366', textTransform: 'uppercase', marginBottom: '8px' }}>
-                      Active Curriculum
+            const teacherNames = Array.from(
+              new Set(
+                matchingSubs.map(s => {
+                  const tId = s.teacher_id || s.user_id || s.profile_id
+                  const matchedProfile = dbProfiles.find(p => p.id === tId || p.user_id === tId)
+                  return matchedProfile?.full_name || matchedProfile?.email || null
+                }).filter((name): name is string => Boolean(name))
+              )
+            )
+
+            return (
+              <motion.div
+                key={sub.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: i * 0.05 }}
+                whileHover={{ y: -4 }}
+                style={{
+                  background: '#FFFFFF',
+                  border: '1px solid #E2E8F0',
+                  borderTop: `4px solid ${sub.color}`,
+                  borderRadius: '0px',
+                  padding: '28px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'space-between',
+                  boxShadow: '0 4px 16px rgba(37, 99, 235, 0.03)',
+                  minHeight: '340px',
+                }}
+              >
+                <div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '14px' }}>
+                    <div style={{
+                      width: '48px', height: '48px', borderRadius: '0px', background: sub.bg,
+                      border: `1px solid ${sub.color}30`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: sub.color
+                    }}>
+                      {sub.icon}
                     </div>
-                    <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0F172A', marginBottom: '8px' }}>
-                      {sub.title}
-                    </h3>
-                    <p style={{ fontSize: '0.88rem', color: '#64748B', margin: '0 0 20px 0', lineHeight: 1.5 }}>
-                      {sub.description || 'Explore sequenced video lessons, learning notes, instructor chat, and assessment quizzes.'}
-                    </p>
+                    <span style={{ fontSize: '0.75rem', padding: '4px 10px', borderRadius: '0px', background: sub.bg, color: sub.color, fontWeight: 700, border: `1px solid ${sub.color}30`, textTransform: 'uppercase' }}>
+                      Active
+                    </span>
                   </div>
 
-                  <div style={{ borderTop: '1px solid #F1F5F9', paddingTop: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{ fontSize: '0.8rem', color: '#64748B', fontWeight: 600 }}>
-                      Instructor: {sub.teacher_name || 'Assigned Faculty'}
-                    </span>
-                    <Link 
-                      href={portalLink}
-                      style={{ 
-                        padding: '10px 18px', 
-                        background: '#003366', 
-                        color: '#FFF', 
-                        fontSize: '0.85rem', 
-                        fontWeight: 800, 
-                        textDecoration: 'none',
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '6px'
-                      }}
-                    >
-                      Open Portal →
-                    </Link>
+                  <h3 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.2rem', fontWeight: 800, color: '#0F172A', marginBottom: '8px' }}>
+                    {sub.title}
+                  </h3>
+                  <p style={{ fontSize: '0.9rem', color: '#64748B', lineHeight: '1.5', marginBottom: '16px' }}>
+                    {sub.desc}
+                  </p>
+
+                  {/* Teachers Section */}
+                  <div style={{ background: '#F8FAFC', border: '1px solid #E2E8F0', padding: '10px 12px', marginBottom: '20px' }}>
+                    <div style={{ fontSize: '0.72rem', fontWeight: 700, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '6px' }}>
+                      Instructors
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                      {teacherNames.length === 0 ? (
+                        <span style={{ fontSize: '0.82rem', color: '#64748B', fontStyle: 'italic' }}>No teachers assigned yet</span>
+                      ) : (
+                        teacherNames.map((name) => (
+                          <span key={name} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '3px 8px', background: '#FFFFFF', border: '1px solid #CBD5E1', fontSize: '0.8rem', fontWeight: 600, color: '#0F172A' }}>
+                            <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: sub.color }} />
+                            {name}
+                          </span>
+                        ))
+                      )}
+                    </div>
                   </div>
                 </div>
-              )
-            })}
+
+                <Link href={sub.path} style={{ textDecoration: 'none', width: '100%', display: 'block' }}>
+                  <motion.div
+                    whileHover={{ scale: 1.01 }}
+                    whileTap={{ scale: 0.99 }}
+                    style={{
+                      padding: '12px',
+                      width: '100%',
+                      textAlign: 'center',
+                      borderRadius: '0px',
+                      background: sub.color,
+                      color: '#FFFFFF',
+                      fontWeight: 700,
+                      fontSize: '0.9rem',
+                      cursor: 'pointer',
+                      boxShadow: `0 4px 12px ${sub.color}30`,
+                    }}
+                  >
+                    Dive Into Class →
+                  </motion.div>
+                </Link>
+              </motion.div>
+            )
+          })}
+        </div>
+      </div>
+
+      {/* Grid: Upcoming Classes & Announcements */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: '24px', marginBottom: '40px' }}>
+        
+        {/* Upcoming Classes */}
+        <div style={{ background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: '0px', padding: '24px', boxShadow: '0 4px 16px rgba(37, 99, 235, 0.03)' }}>
+          <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.3rem', fontWeight: 800, color: '#0F172A', marginBottom: '18px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <IconCalendar /> Upcoming Classes
+          </h2>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            {upcomingClasses.length === 0 ? (
+              <p style={{ color: '#64748B', fontSize: '0.9rem', padding: '24px', background: '#F8FAFC', borderRadius: '0px', textAlign: 'center', border: '1px dashed #CBD5E1', margin: 0 }}>
+                No upcoming classes scheduled.
+              </p>
+            ) : (
+              upcomingClasses.map((cls) => (
+                <div key={cls.id} style={{
+                  padding: '16px', borderRadius: '0px', background: '#F8FAFC',
+                  border: '1px solid #E2E8F0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px',
+                }}>
+                  <div>
+                    <h4 style={{ color: '#0F172A', fontSize: '0.95rem', fontWeight: 700, margin: '0 0 4px' }}>{cls.title}</h4>
+                    <p style={{ color: '#64748B', fontSize: '0.82rem', margin: 0, fontWeight: 500 }}>
+                      {cls.subject?.title} &middot; {new Date(cls.scheduled_at).toLocaleDateString()} at {new Date(cls.scheduled_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </p>
+                  </div>
+                  {cls.meeting_link && (
+                    <a href={cls.meeting_link} target="_blank" rel="noreferrer" style={{
+                      padding: '8px 16px', borderRadius: '0px', background: '#2563EB', color: '#FFFFFF',
+                      fontSize: '0.82rem', fontWeight: 700, textDecoration: 'none', flexShrink: 0, boxShadow: '0 2px 6px rgba(37, 99, 235, 0.2)'
+                    }}>
+                      Join Class
+                    </a>
+                  )}
+                </div>
+              ))
+            )}
           </div>
-        )}
+        </div>
+
+        {/* Announcements */}
+        <div style={{ background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: '0px', padding: '24px', boxShadow: '0 4px 16px rgba(37, 99, 235, 0.03)' }}>
+          <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.3rem', fontWeight: 800, color: '#0F172A', marginBottom: '18px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <IconMegaphone /> Announcements
+          </h2>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            {announcements.length === 0 ? (
+              <p style={{ color: '#64748B', fontSize: '0.9rem', padding: '24px', background: '#F8FAFC', borderRadius: '0px', textAlign: 'center', border: '1px dashed #CBD5E1', margin: 0 }}>
+                No announcements at this time.
+              </p>
+            ) : (
+              announcements.map((ann) => (
+                <div key={ann.id} style={{
+                  padding: '16px', borderRadius: '0px', background: '#F8FAFC',
+                  border: '1px solid #E2E8F0',
+                }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                    <h4 style={{ color: '#0F172A', fontSize: '0.95rem', fontWeight: 700, margin: 0 }}>{ann.title}</h4>
+                    <span style={{ fontSize: '0.75rem', color: '#94A3B8', fontWeight: 600 }}>
+                      {new Date(ann.created_at).toLocaleDateString()}
+                    </span>
+                  </div>
+                  <p style={{ color: '#64748B', fontSize: '0.85rem', lineHeight: 1.5, margin: 0 }}>{ann.body}</p>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+
       </div>
     </div>
   )
