@@ -281,7 +281,7 @@ export default function RegisterPage() {
           <Link href="/" style={{ textDecoration: 'none' }}>
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
               <Image 
-                src="/pictures/7925bd32-d73a-411d-ab2a-1a6aaefc0df1 (1).png" 
+                src="/pictures/logo.png" 
                 alt="BridgeToBrilliance" 
                 width={36} 
                 height={36} 

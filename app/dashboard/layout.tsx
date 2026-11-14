@@ -321,7 +321,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 width: '42px', height: '42px',
                 display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative',
               }}>
-                <Image src="/pictures/7925bd32-d73a-411d-ab2a-1a6aaefc0df1 (1).png" alt="BridgeToBrilliance" width={42} height={42} style={{ objectFit: 'contain' }} priority />
+                <Image src="/pictures/logo.png" alt="BridgeToBrilliance" width={42} height={42} style={{ objectFit: 'contain' }} priority />
                 <button
                   onClick={() => setShowAdminLogin(true)}
                   aria-label="Admin Access"

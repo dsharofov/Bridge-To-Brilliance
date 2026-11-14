@@ -196,7 +196,7 @@ export default function TeamPage() {
               }}>
                 <Link href="/" style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', textDecoration: 'none' }}>
                   <Image
-                    src="/pictures/7925bd32-d73a-411d-ab2a-1a6aaefc0df1.png"
+                    src="/pictures/logo.png"
                     alt="BridgeToBrilliance Logo"
                     width={32}
                     height={32}
