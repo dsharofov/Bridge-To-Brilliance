@@ -1124,7 +1124,6 @@ export default function ComputerScienceTeacherPortal() {
               <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#0F172A', marginBottom: '16px' }}>Upload Video Lesson</h3>
               <form onSubmit={handleUploadVideo}>
                 <div style={{ marginBottom: '14px' }}><label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, marginBottom: '6px' }}>Topic</label><input type="text" value={topic} onChange={e => setTopic(e.target.value)} required style={{ width: '100%', padding: '10px', border: '1px solid #CBD5E1', boxSizing: 'border-box' }} /></div>
-                
                 <div style={{ marginBottom: '14px' }}>
                   <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, marginBottom: '6px' }}>Playlist / Module</label>
                   {!isCreatingNewPlaylist ? (

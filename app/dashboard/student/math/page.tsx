@@ -408,7 +408,10 @@ export default function MathStudentPortal() {
     return timeB - timeA
   })
 
-  const progressPercent = lessons.length > 0 ? Math.round((unlockedLessonIds.length / lessons.length) * 100) : 0
+  //const progressPercent = lessons.length > 0 ? Math.round((unlockedLessonIds.length / lessons.length) * 100) : 0
+  const validUnlockedCount = lessons.length > 0 ? unlockedLessonIds.filter(id => lessons.some(l => l.id === id)).length : 0
+
+  const progressPercent = lessons.length > 0 ? Math.min(100, Math.round((validUnlockedCount / lessons.length) * 100)) : 0
 
   if (loading) return <div style={{ display: 'flex', justifyContent: 'center', paddingTop: '100px' }}><div className="spinner" /></div>
 
@@ -483,7 +486,7 @@ export default function MathStudentPortal() {
             <div style={{ background: '#FFF', border: '1px solid #E2E8F0', padding: '20px 24px', display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '24px', boxShadow: '0 2px 8px rgba(15,23,42,0.02)' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#0F172A' }}>Curriculum Completion Progress</span>
-                <span style={{ fontSize: '0.85rem', fontWeight: 800, color: '#003366' }}>{unlockedLessonIds.length} of {lessons.length} Lessons Unlocked ({progressPercent}%)</span>
+                <span style={{ fontSize: '0.85rem', fontWeight: 800, color: '#003366' }}>{validUnlockedCount} of {lessons.length} Lessons Unlocked ({progressPercent}%)</span>
               </div>
               <div style={{ width: '100%', height: '8px', background: '#F1F5F9', overflow: 'hidden' }}>
                 <motion.div initial={{ width: 0 }} animate={{ width: `${progressPercent}%` }} style={{ height: '100%', background: '#003366' }} />
@@ -734,7 +737,6 @@ export default function MathStudentPortal() {
                     <h3 style={{ fontSize: '0.98rem', fontWeight: 800, margin: 0 }}>{selectedUser.full_name}</h3>
                     <span style={{ fontSize: '0.72rem', color: '#003366', textTransform: 'uppercase', fontWeight: 700 }}>{selectedUser.role}</span>
                   </div>
-                  <button onClick={() => handleClearHistory(selectedUser.id)} style={{ background: '#FEF2F2', border: '1px solid #FEE2E2', color: '#DC2626', padding: '6px 12px', fontSize: '0.72rem', fontWeight: 700, cursor: 'pointer' }}>Clear History</button>
                 </div>
 
                 <div style={{ flex: 1, padding: '20px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '12px' }}>

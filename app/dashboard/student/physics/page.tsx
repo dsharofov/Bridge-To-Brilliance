@@ -414,7 +414,13 @@ export default function PhysicsStudentPortal() {
     return timeB - timeA
   })
 
-  const progressPercent = lessons.length > 0 ? Math.round((unlockedLessonIds.length / lessons.length) * 100) : 0
+  const validUnlockedCount = lessons.length > 0 
+  ? unlockedLessonIds.filter(id => lessons.some(l => l.id === id)).length 
+  : 0
+
+  const progressPercent = lessons.length > 0 
+    ? Math.min(100, Math.round((validUnlockedCount / lessons.length) * 100)) 
+    : 0
 
   if (loading) return <div style={{ display: 'flex', justifyContent: 'center', paddingTop: '100px' }}><div className="spinner" /></div>
 
@@ -745,7 +751,7 @@ export default function PhysicsStudentPortal() {
                     <h3 style={{ fontSize: '0.98rem', fontWeight: 800, margin: 0 }}>{selectedUser.full_name}</h3>
                     <span style={{ fontSize: '0.72rem', color: '#9B59B6', textTransform: 'uppercase', fontWeight: 700 }}>{selectedUser.role}</span>
                   </div>
-                  <button onClick={() => handleClearHistory(selectedUser.id)} style={{ background: '#FEF2F2', border: '1px solid #FEE2E2', color: '#DC2626', padding: '6px 12px', fontSize: '0.72rem', fontWeight: 700, cursor: 'pointer' }}>Clear History</button>
+                  {/*<button onClick={() => handleClearHistory(selectedUser.id)} style={{ background: '#FEF2F2', border: '1px solid #FEE2E2', color: '#DC2626', padding: '6px 12px', fontSize: '0.72rem', fontWeight: 700, cursor: 'pointer' }}>Clear History</button>*/}
                 </div>
 
                 <div style={{ flex: 1, padding: '20px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '12px' }}>

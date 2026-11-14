@@ -6,7 +6,7 @@ import Image from 'next/image'
 
 export default function Hero() {
   const stats = [
-    { count: 'Infinity', label: 'potential' },
+    { count: 'Infinite', label: 'potential' },
     { count: '6', label: 'core subjects' },
     { count: '13', label: 'expert staff' },
     { count: '100%', label: 'free access' },
@@ -25,7 +25,7 @@ export default function Hero() {
         position: 'absolute',
         inset: 0,
         zIndex: 1,
-        opacity: 0.73,
+        opacity: 0.87,
         pointerEvents: 'none',
       }}>
         <Image
