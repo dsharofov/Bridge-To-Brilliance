@@ -36,7 +36,7 @@ export default function Footer() {
                 //background: '#EFF6FF',
                 //border: '1px solid #2563EB',
               }}>
-                <Image src="/pictures/7925bd32-d73a-411d-ab2a-1a6aaefc0df1 (1).png" alt="BridgeToBrilliance" width={22} height={22} style={{ borderRadius: '0px', objectFit: 'contain' }} />
+                <Image src="/pictures/logo.png" alt="BridgeToBrilliance" width={22} height={22} style={{ borderRadius: '0px', objectFit: 'contain' }} />
               </div>
               <span style={{
                 fontFamily: 'var(--font-heading)',

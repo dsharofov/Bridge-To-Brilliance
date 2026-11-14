@@ -103,7 +103,7 @@ export default function Navbar() {
                 }}
               >
                 <Image 
-                  src="/pictures/7925bd32-d73a-411d-ab2a-1a6aaefc0df1 (1).png" 
+                  src="/pictures/logo.png" 
                   alt="BridgeToBrilliance Logo" 
                   fill
                   sizes="100px"
