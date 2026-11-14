@@ -140,7 +140,7 @@ export default function TimerPage() {
   useEffect(() => {
     if (isRunning) {
       // Set end time target in localStorage if not already set
-      const targetDuration = MODES[mode].duration
+      //const targetDuration = MODES[mode].duration
       const existingState = localStorage.getItem('pomodoro_timer_state')
       let endTime: number
 

@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { useProfile } from '../layout'
-import type { Subject, Announcement, Grade, Profile, Class as ClassType } from '@/types/database.types'
+import type { Subject, Profile, Class as ClassType } from '@/types/database.types'
 
 type SubjectWithEnrollments = Subject & {
   enrollments: { id: string }[]
@@ -16,10 +16,10 @@ type ClassWithSubject = ClassType & {
   subject: Pick<Subject, 'title'> | null
 }
 
-type GradeWithDetails = Grade & {
-  subject: Pick<Subject, 'title'> | null
-  student: Pick<Profile, 'full_name' | 'email'> | null
-}
+// type GradeWithDetails = Grade & {
+//   subject: Pick<Subject, 'title'> | null
+//   student: Pick<Profile, 'full_name' | 'email'> | null
+// }
 
 // Helper to format dates cleanly into numeric format (e.g., 14.03.2026, 14:30)
 function formatNumericDate(dateStr: string): string {
@@ -167,8 +167,8 @@ export default function TeacherDashboard() {
   const [allTeachers, setAllTeachers] = useState<Profile[]>([])
   const [totalStudentsCount, setTotalStudentsCount] = useState(0)
   const [classes, setClasses] = useState<ClassWithSubject[]>([])
-  const [grades, setGrades] = useState<GradeWithDetails[]>([])
-  const [announcements, setAnnouncements] = useState<Announcement[]>([])
+  //const [grades, setGrades] = useState<GradeWithDetails[]>([])
+  //const [announcements, setAnnouncements] = useState<Announcement[]>([])
   const [loading, setLoading] = useState(true)
 
   const [classTab, setClassTab] = useState<'upcoming' | 'history'>('upcoming')
@@ -199,8 +199,8 @@ export default function TeacherDashboard() {
           { data: teacherData },
           { count: studentCount },
           { data: classData },
-          { data: gradeData },
-          { data: annData }
+          //{ data: gradeData },
+          //{ data: annData }
         ] = await Promise.all([
           supabase.from('subjects').select('*, enrollments(id), lessons(id)').order('title', { ascending: true }),
           supabase.from('profiles').select('*').eq('role', 'teacher'),
@@ -216,8 +216,8 @@ export default function TeacherDashboard() {
         if (teacherData) setAllTeachers(teacherData as Profile[])
         if (studentCount !== null) setTotalStudentsCount(studentCount)
         if (classData) setClasses(classData as ClassWithSubject[])
-        if (gradeData) setGrades(gradeData as GradeWithDetails[])
-        if (annData) setAnnouncements(annData)
+       // if (gradeData) setGrades(gradeData as GradeWithDetails[])
+        //if (annData) setAnnouncements(annData)
 
       } catch (err) {
         console.error(err)

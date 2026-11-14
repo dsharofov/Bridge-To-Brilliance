@@ -77,7 +77,8 @@ const features = [
 
 export default function StudyHubPage() {
   const profile = useProfile()
-  const [stats, setStats] = useState<{ totalMinutes: number; sessionsCompleted: number; currentStreak: number } | null>(null)
+  const [_stats, setStats] = useState<{ totalMinutes: number; sessionsCompleted: number; currentStreak: number } | null>(null)
+  
   const [groupCount, setGroupCount] = useState(0)
   const [noteCount, setNoteCount] = useState(0)
   const [unlockedVideosCount, setUnlockedVideosCount] = useState(0)

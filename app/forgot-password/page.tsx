@@ -4,11 +4,11 @@ import { useState, useEffect, useMemo } from 'react'
 import { motion } from 'framer-motion'
 import Image from 'next/image'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+//import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 
 export default function ResetPasswordPage() {
-  const router = useRouter()
+  //const router = useRouter()
   const supabase = createClient()
   
   const [password, setPassword] = useState('')

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { useProfile } from '@/app/dashboard/layout'
@@ -316,14 +316,6 @@ export default function MathStudentPortal() {
     setMessages(prev => prev.map(m => m.id === msgId ? { ...m, message_text: editText.trim() } : m))
     setEditingMessageId(null)
     setEditText('')
-  }
-
-  const handleClearHistory = async (targetUserId: string) => {
-    if (!confirm('Clear chat history?')) return
-    const ids = messages.filter(m => (m.sender_id === profile?.id && m.receiver_id === targetUserId) || (m.sender_id === targetUserId && m.receiver_id === profile?.id)).map(m => m.id)
-    if (ids.length === 0) return
-    await supabase.from('direct_messages').delete().in('id', ids)
-    setMessages(prev => prev.filter(m => !ids.includes(m.id)))
   }
 
   const handleUnlockSubmit = (lessonId: string, correctKeyword: string) => {
